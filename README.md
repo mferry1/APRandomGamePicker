@@ -2,6 +2,9 @@
 
 This app is in alpha. Expect a few bugs, and report them please!
 
+# How to use
+Copy the AP Game Picker folder somewhere on your computer and run "main.html"
+
 # What's the point of this App?
 This App is a convenient way to view and manage the games you play for Archipelago sessions. It's primarily designed for use of one person to manage their own libraries, but can can be used for multi-person sessions too.
 
