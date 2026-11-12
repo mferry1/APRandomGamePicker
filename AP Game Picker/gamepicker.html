@@ -1,0 +1,1818 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>rulesettings.html</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+
+<body>
+    <header>
+        <a href="main.html" class="back-home">
+            <span aria-hidden="true">←</span> Back to Home
+        </a>
+  
+        <h1>🎲 Random Game Picker</h1>
+        <div class="text-muted">Pick games for your Archipelago Session!</div>
+        <div class="border-bottom"></div>
+    </header>
+
+    <main>
+        <section class="card">
+        <h2>Generation Options</h2>
+            <div>
+                <div>
+                    <span class="field-label">Number of Games:</span>
+
+                    <div class="radio-option">
+                        <input id="generationOptionsExactlyRadioButton" type="radio" name="countMode" value="exactly" checked></input>
+                        <label for="generationOptionsExactlyRadioButton">Exactly</label>
+                    </div>
+
+                    <div class="radio-option">
+                        <input id="generationOptionsBetweenRadioButton" type="radio" name="countMode" value="between"></input>
+                        <label for="generationOptionsBetweenRadioButton">Between</label>
+                    </div>
+
+                    <div id="generationOptionsExactlyDiv" class="toolbar">
+                        <div>
+                            <label>Count:</label>
+                            <input type="number" id="generationOptionsExactlyInput" min="1" step="1" value="3"></input>
+                        </div>
+                    </div>
+
+                    <div id="generationOptionsBetweenDiv" class="toolbar hidden">
+                        <div>
+                            <label class="field-label" id="generationOptionsMinCountLabel" for="generationOptionsMinCountInput">Minimum:</label>
+                            <input type="number" id="generationOptionsMinInput" min="1" step="1" value="2"></input>
+                        </div>
+
+                        <div>
+                            <label class="field-label" for="generationOptionsMaxCountInput">Maximum:</label>
+                            <input type="number" id="generationOptionsMaxInput" min="1" step="1" value="5"></input>
+                        </div>
+                    </div>
+                </div>
+            
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <input class="checkbox-item" type="checkbox" id="generationOptionsWithReplacementCheckbox"></input>
+                    <label>With Replacement</label>
+                    <span class="tooltip" tabindex="0" role="img"
+                        aria-label="If checked, the same game can be picked multiple times"
+                        title="If checked, the same game can be picked multiple times"
+                        style=" display: inline-flex; align-items: center; justify-content: center;
+                            width: 18px; height: 18px; border: 1px solid var(--text);
+                            border-radius: 50%; font-size: 12px; font-weight: bold;
+                            cursor: help; flex-shrink: 0;">?
+                    </span>
+                </div>
+            </div>
+        </section>
+
+        <section class="card">
+            <div class="toolbar">
+                <button id="gameSelectionTabButton" class="button-active" type="button" aria-selected="true">Games</button>
+                <button id="ruleSelectionTabButton"  type="button" aria-selected="false">Rules</button>
+            </div>
+
+            <div id="gameSelectionView">
+                <div class="section-heading">
+                    <h2>Game Selection</h2>
+                </div>
+
+                <p class="text-muted">
+                    Click a Game to move it between Active and Inactive.
+                    Only active games will be used when picking.
+                </p>
+
+                <div class="two-column-grid">
+                    <section class="column-grid">
+                        <h3 style="display: block; color: var(--warning);">X Inactive Games</h3>
+                        <p class="column-description">These games are forbidden during picking.</p>
+                        <div class="border-bottom" style="margin-bottom: 10px;"></div>
+                        <div id="gameSelectionInactiveGames" class="column-list"></div>
+                    </section>
+
+                    <section class="column-grid">
+                        <h3 style="display: block; color: var(--accent);">✓ Active Games</h3>
+                        <p class="column-description">These games will allowed during picking.</p>
+                        <div class="border-bottom" style="margin-bottom: 10px;"></div>
+                        <div id="gameSelectionActiveGames" class="column-list"></div>
+                    </section>
+
+                </div>
+            </div>
+
+            <div id="ruleSelectionView" hidden>
+                <div class="section-heading">
+                    <h2>Rule Selection</h2>
+                </div>
+
+                <p class="text-muted">
+                    Click a rule to move it between Active and Inactive.
+                    Only active rules will be used when picking.
+                </p>
+
+                <div class="two-column-grid">
+                    <section class="column-grid">
+                        <h3 style="display: block; color: var(--warning);">X Inactive Rules</h3>
+                        <p class="column-description">These rules will be ignored by the picker.</p>
+                        <div class="border-bottom" style="margin-bottom: 10px;"></div>
+                        <div id="ruleSelectionInactiveRules" class="column-list"></div>
+                    </section>
+
+                    <section class="column-grid">
+                        <h3 style="display: block; color: var(--accent);">✓ Active Rules</h3>
+                        <p class="column-description">These rules will be applied during picking.</p>
+                        <div class="border-bottom" style="margin-bottom: 10px;"></div>
+                        <div id="ruleSelectionActiveRules" class="column-list"></div>
+                    </section>
+
+                </div>
+            </div>
+
+        </section>
+
+        <section class="card">
+            <h2>Selection Summary</h2>
+
+            <div class="card" style="background: var(--bg);">
+                <label id="activeGamesLabel" style="display: block;"></label>
+                <label id="activeRulesLabel" style="display: block;"></label>
+                <label id="minimumGamesToSatifyAllRulesLabel" style="display: block;"></label>
+            </div>
+
+            <div id="selectionSummaryView" class="card-warning" aria-live="polite">
+                <h3>⚠️ Warnings</h3>
+                <div>
+                    <p id="selectionSummaryWarningsLabel" style="color: var(--warning)"></p>
+                </div>
+            </div>
+        </section>
+
+        <section class="card">
+            <h2>Generate Games</h2>
+            <p class="muted">Your generation options and active rules are ready to use.</p>
+
+            
+            <div class="toolbar">
+                <button type="button" class="button-disabled" id="generateGamesButton" aria-selected="false">Generate Games</button>
+                <button type="button" class="button-remove" id="clearGamesButton" aria-selected="false">Clear Games</button>
+            </div>
+
+            <div class="card" id="pickedGamesView" hidden>
+                <h2>Your Picked Games!</h2>
+
+                <div id="pickedGamesList"></div>
+            </div>
+        </section>
+
+        <p class="text-muted" style="font-size:12px;text-align:center">Changes are saved locally in this browser cache. Export backups regularly.</p>
+    </main>
+
+    <script src="js/data.js"></script>
+    <script src="js/games.js"></script>
+
+    <script>
+
+window.minimumGamesToSatifyAllRules = 0;
+
+// Generation Options
+const generationOptionsExactlyRadioButton = document.getElementById('generationOptionsExactlyRadioButton');
+const generationOptionsBetweenRadioButton = document.getElementById('generationOptionsBetweenRadioButton');
+const generationOptionsExactlyDiv = document.getElementById('generationOptionsExactlyDiv');
+const generationOptionsBetweenDiv = document.getElementById('generationOptionsBetweenDiv');
+const generationOptionsExactlyInput = document.getElementById('generationOptionsExactlyInput');
+const generationOptionsMinInput = document.getElementById('generationOptionsMinInput');
+const generationOptionsMaxInput = document.getElementById('generationOptionsMaxInput');
+const generationOptionsMinCountLabel = document.getElementById('generationOptionsMinCountLabel');
+const generationOptionsWithReplacementCheckbox = document.getElementById('generationOptionsWithReplacementCheckbox');
+
+// Game/Rule Selection
+const gameSelectionTabButton = document.getElementById('gameSelectionTabButton');
+const ruleSelectionTabButton = document.getElementById('ruleSelectionTabButton');
+const gameSelectionView = document.getElementById('gameSelectionView');
+const ruleSelectionView = document.getElementById('ruleSelectionView');
+const gameSelectionInactiveGames = document.getElementById('gameSelectionInactiveGames');
+const gameSelectionActiveGames = document.getElementById('gameSelectionActiveGames');
+const ruleSelectionInactiveRules = document.getElementById('ruleSelectionInactiveRules');
+const ruleSelectionActiveRules = document.getElementById('ruleSelectionActiveRules');
+
+// Selection Summary
+const selectionSummaryView = document.getElementById('selectionSummaryView');
+const selectionSummaryWarningsLabel = document.getElementById('selectionSummaryWarningsLabel');
+const minimumGamesToSatifyAllRulesLabel = document.getElementById('minimumGamesToSatifyAllRulesLabel');
+
+// Generate Games
+const generateGamesButton = document.getElementById('generateGamesButton');
+const clearGamesButton = document.getElementById('clearGamesButton');
+const pickedGamesView = document.getElementById('pickedGamesView');
+
+generationOptionsExactlyRadioButton.addEventListener('change', () => {
+    hideGenerationOptionsBetweenGroup();
+    showGenerationOptionsExactlyGroup();
+    updateSelectionSummary();
+});
+
+generationOptionsBetweenRadioButton.addEventListener('change', () => {
+    hideGenerationOptionsExactlyGroup();
+    showGenerationOptionsBetweenGroup();
+    updateSelectionSummary();
+});
+
+generationOptionsExactlyInput.addEventListener('input', () => {
+    updateSelectionSummary();
+});
+
+generationOptionsMinInput.addEventListener('input', () => {
+    validateBetweenMinMaxValues();
+});
+
+generationOptionsMaxInput.addEventListener('input', () => {
+    validateBetweenMinMaxValues();
+});
+
+generationOptionsWithReplacementCheckbox.addEventListener('change', () => {
+    updateSelectionSummary();
+});
+
+gameSelectionTabButton.addEventListener('click', () => {
+    if(gameSelectionTabButton.getAttribute('aria-selected') === 'true') {
+        hideGameSelectionView();
+        unselectGameSelectionTabButton();
+    }
+    else {
+        unselectRuleSelectionTabButton();
+        hideRuleSelectionView();
+        showGameSelectionView();
+        selectGameSelectionTabButton();
+    }
+});
+
+ruleSelectionTabButton.addEventListener('click', () => {
+    if(ruleSelectionTabButton.getAttribute('aria-selected') === 'true') {
+        hideRuleSelectionView();
+        unselectRuleSelectionTabButton();
+    }
+    else {
+        unselectGameSelectionTabButton();
+        hideGameSelectionView();
+        showRuleSelectionView();
+        selectRuleSelectionTabButton();
+    }
+});
+
+generateGamesButton.addEventListener('click', () => {
+    generateGames();
+    updatePickedGamesView();
+    updateClearGamesButton();
+});
+
+clearGamesButton.addEventListener('click', () => {
+    window.data.deletePickedGames();
+    updatePickedGamesView();
+    updateClearGamesButton();
+});
+
+// Button and View UI visuals
+function showGenerationOptionsExactlyGroup() {
+    generationOptionsExactlyDiv.classList.remove('hidden');
+}
+function hideGenerationOptionsExactlyGroup() {
+    generationOptionsExactlyDiv.classList.add('hidden');
+}
+function showGenerationOptionsBetweenGroup() {
+    generationOptionsBetweenDiv.classList.remove('hidden');
+}
+function hideGenerationOptionsBetweenGroup() {
+    generationOptionsBetweenDiv.classList.add('hidden');
+}
+function showGameSelectionView(){
+    gameSelectionView.style.display = 'block';
+    gameSelectionView.classList.add('active');
+}
+function hideGameSelectionView(){
+    gameSelectionView.style.display = 'none';
+    gameSelectionView.classList.remove('active');
+}
+function showRuleSelectionView(){
+    ruleSelectionView.style.display = 'block';
+    ruleSelectionView.classList.add('active');
+}
+function hideRuleSelectionView(){
+    ruleSelectionView.style.display = 'none';
+    ruleSelectionView.classList.remove('active');
+}
+function selectGameSelectionTabButton() {
+    gameSelectionTabButton.setAttribute('aria-selected', 'true');
+    gameSelectionTabButton.className = "button-active";
+}
+function unselectGameSelectionTabButton() {
+    gameSelectionTabButton.setAttribute('aria-selected', 'false');
+    gameSelectionTabButton.className = "";
+}
+function selectRuleSelectionTabButton() {
+    ruleSelectionTabButton.setAttribute('aria-selected', 'true');
+    ruleSelectionTabButton.className = "button-active";
+}
+function unselectRuleSelectionTabButton() {
+    ruleSelectionTabButton.setAttribute('aria-selected', 'false');
+    ruleSelectionTabButton.className = "";
+}
+function enableGenerateGamesButton() {
+    generateGamesButton.setAttribute('aria-selected', 'true');
+    generateGamesButton.className = "button-active";
+}
+function disableGenerateGamesButton() {
+    generateGamesButton.setAttribute('aria-selected', 'false');
+    generateGamesButton.className = "button-disabled";
+}
+
+// Generating UI elements
+function updateGamesTabGamesList() {
+    const gamesTabGamesList = document.getElementById('gamesTabGamesList');
+
+    // Clear existing contents
+    gamesTabGamesList.innerHTML = '';
+
+    // Get search input and selected filter
+    const searchInput = document.getElementById('gamesTabSearchInput').value.trim().toLowerCase();
+    const searchFilter = document.getElementById('gamesTabSearchFilter').value;
+
+    // Filter games based on search input
+    const filteredGames = window.data.games.filter(game => {
+
+        // Search by game name
+        if (searchFilter === 'games') {
+            return game.name.toLowerCase().includes(searchInput);
+        }
+
+        // Search by assigned tag name
+        if (searchFilter === 'tags') {
+            return window.data.tags.some(tag =>
+                tag.games.includes(game.id) &&
+                tag.name.toLowerCase().includes(searchInput)
+            );
+        }
+
+        return true;
+    });
+
+    // Create an element for each matching game
+    filteredGames.forEach(game => {
+
+        const gameElement = document.createElement('div');
+        gameElement.className = "card";
+        gameElement.style.display = "flex";
+        gameElement.style.alignItems = "center";
+        gameElement.style.gap = "12px";
+
+        // SECTION 1: Game Information
+        const gameTextGroup = document.createElement('div');
+        gameTextGroup.style.display = "flex";
+        gameTextGroup.style.flexDirection = "column";
+        gameTextGroup.style.flexShrink = "0";
+
+        // Display Name
+        const gameName = document.createElement('div');
+        gameName.textContent = game.name;
+        gameName.className = "text";
+        gameTextGroup.appendChild(gameName);
+
+        // Display "Has X tags"
+        const gameHasXTags = document.createElement('div');
+        gameHasXTags.textContent = "Has " + `${game.tags?.length || 0}` + " tag(s)";
+        gameHasXTags.style.fontSize = "12px";
+        gameHasXTags.className = "text-muted";
+        gameTextGroup.appendChild(gameHasXTags);
+
+        gameElement.appendChild(gameTextGroup);
+
+        // SECTION 2: Assigned Tags (Horizontally Scrollable)
+        const gameTagsGroup = document.createElement('div');
+        gameTagsGroup.style.display = "flex";
+        gameTagsGroup.style.alignItems = "center";
+        gameTagsGroup.style.gap = "8px";
+        gameTagsGroup.style.flex = "1";
+        gameTagsGroup.style.minWidth = "0";
+        gameTagsGroup.style.overflowX = "auto";
+        gameTagsGroup.style.whiteSpace = "nowrap";
+
+        // Find and display each tag assigned to this game
+        const assignedTags = window.data.tags.filter(tag =>
+            tag.games.includes(game.id)
+        );
+
+        assignedTags.forEach(tag => {
+            const tagButton = document.createElement('button');
+            tagButton.textContent = tag.name;
+            tagButton.type = "button";
+
+            // Optional: make these look like display-only tag buttons
+            tagButton.style.flexShrink = "0";
+            tagButton.style.cursor = "default";
+
+            gameTagsGroup.appendChild(tagButton);
+        });
+
+        gameElement.appendChild(gameTagsGroup);
+
+
+        // SECTION 3: Action Buttons
+        const gameActionsGroup = document.createElement('div');
+        gameActionsGroup.style.display = "flex";
+        gameActionsGroup.style.alignItems = "center";
+        gameActionsGroup.style.gap = "8px";
+        gameActionsGroup.style.flexShrink = "0";
+
+        // Update Button
+        const gameUpdate = document.createElement('button');
+        gameUpdate.textContent = 'Update';
+        gameUpdate.type = "button";
+
+        if (window.updateGameCurrentGameId == game.id) {
+            gameUpdate.classList.add('game-update-selected');
+        }
+
+        gameUpdate.addEventListener('click', () => {
+
+            window.updateGameCurrentGameId = game.id;
+            window.updateGameCurrentGameButton = gameUpdate;
+
+            document.querySelectorAll('.game-update-selected').forEach(button => {
+                button.classList.remove('game-update-selected');
+            });
+
+            gameUpdate.classList.add('game-update-selected');
+
+            hideAddGameView();
+            unselectAddGameButton();
+            showUpdateGameView();
+            selectUpdateGameButton();
+        });
+
+        gameActionsGroup.appendChild(gameUpdate);
+
+        // Delete Button
+        const gameDelete = document.createElement('button');
+        gameDelete.className = 'button-remove';
+        gameDelete.textContent = 'Delete';
+        gameDelete.type = "button";
+
+        gameDelete.addEventListener('click', () => {
+            window.data.deleteGame(game.id);
+
+            updateGamesTabGamesList();
+        });
+
+        gameActionsGroup.appendChild(gameDelete);
+
+        gameElement.appendChild(gameActionsGroup);
+
+        gamesTabGamesList.appendChild(gameElement);
+    });
+
+    // Update game count
+    document.getElementById('yourGamesLabel').textContent = "Your games: " + `(${window.data.games.length})`;
+    updateTotalGamesLabel();
+}
+
+function updateInactiveRulesList() {
+    const inactiveRulesList = document.getElementById('ruleSelectionInactiveRules');
+    inactiveRulesList.innerHTML = '';
+
+    const inactiveRules = window.data.rules.filter(rule =>
+        !window.data.activeRules.includes(rule.id)
+    );
+
+    // Create an element for each rule
+    inactiveRules.forEach(rule => {
+
+        // Find the target (game or tag)
+        const targetList = rule.targetType === 'games'
+            ? window.data.games
+            : window.data.tags;
+
+        const target = targetList.find(item => item.id === rule.targetId);
+
+        // Find the preset definition
+        const presetType = rule.targetType === 'games' ? 'game' : 'tag';
+
+        const preset = window.data.RULEPRESETDEFS[presetType].find(preset =>
+            preset.id === rule.rulePresetDefId
+        );
+
+        if (!target || !preset) return;
+
+        const ruleElement = document.createElement('div');
+        ruleElement.className = 'column-card';
+        ruleElement.style.display = 'flex';
+        ruleElement.style.alignItems = 'center';
+        ruleElement.style.gap = '8px';
+
+        // SECTION 1: Rule Information
+        const ruleTextGroup = document.createElement('div');
+        ruleTextGroup.style.display = 'flex';
+        ruleTextGroup.style.flexDirection = 'column';
+        ruleTextGroup.style.flexShrink = '0';
+
+        // Display target name
+        const ruleTargetName = document.createElement('div');
+        ruleTargetName.textContent = presetType.charAt(0).toUpperCase() + presetType.slice(1) + ": " + target.name;
+        ruleTargetName.className = 'text';
+        ruleTextGroup.appendChild(ruleTargetName);
+        ruleTargetName.style.fontSize = '20px';
+
+        // Display preset name
+        const rulePresetName = document.createElement('div');
+        rulePresetName.textContent = preset.name;
+        rulePresetName.className = 'text-muted';
+        rulePresetName.style.fontSize = '12px';
+        ruleTextGroup.appendChild(rulePresetName);
+
+        ruleElement.appendChild(ruleTextGroup);
+
+        // SECTION 2: Rule Values
+        const ruleValuesGroup = document.createElement('div');
+        ruleValuesGroup.style.display = 'flex';
+        ruleValuesGroup.style.alignItems = 'center';
+        ruleValuesGroup.style.gap = '8px';
+        ruleValuesGroup.style.flex = '1';
+        ruleValuesGroup.style.minWidth = '0';
+        ruleValuesGroup.style.overflowX = 'auto';
+
+        // Match each stored value with its preset field definition
+        preset.fields.forEach((field, index) => {
+
+            const valueButton = document.createElement('button');
+            valueButton.type = 'button';
+            valueButton.textContent = `${field.label}: ${rule.values[index]}`;
+
+            // Display only
+            valueButton.style.flexShrink = '0';
+            valueButton.style.cursor = 'pointer';
+            valueButton.style.pointerEvents = "none";
+            valueButton.disabled = true;
+
+            ruleValuesGroup.appendChild(valueButton);
+        });
+
+        ruleElement.appendChild(ruleValuesGroup);
+
+        ruleElement.style.cursor = 'pointer';
+
+        ruleElement.addEventListener('click', () => {
+            window.data.addActiveRule(rule.id);
+            updateInactiveRulesList();
+            updateActiveRulesList();
+            updateActiveGamesAndRulesLabel();
+            updateSelectionSummary();
+        });
+
+        inactiveRulesList.appendChild(ruleElement);
+    });
+}
+
+function updateActiveRulesList() {
+    const activeRulesList = document.getElementById('ruleSelectionActiveRules');
+    activeRulesList.innerHTML = '';
+
+    const activeRules = window.data.rules.filter(rule =>
+        window.data.activeRules.includes(rule.id)
+    );
+
+    // Create an element for each rule
+    activeRules.forEach(rule => {
+
+        // Find the target (game or tag)
+        const targetList = rule.targetType === 'games'
+            ? window.data.games
+            : window.data.tags;
+
+        const target = targetList.find(item => item.id === rule.targetId);
+
+        // Find the preset definition
+        const presetType = rule.targetType === 'games' ? 'game' : 'tag';
+
+        const preset = window.data.RULEPRESETDEFS[presetType].find(preset =>
+            preset.id === rule.rulePresetDefId
+        );
+
+        if (!target || !preset) return;
+
+        const ruleElement = document.createElement('div');
+        ruleElement.className = 'column-card';
+        ruleElement.style.display = 'flex';
+        ruleElement.style.alignItems = 'center';
+        ruleElement.style.gap = '12px';
+
+        // SECTION 1: Rule Information
+        const ruleTextGroup = document.createElement('div');
+        ruleTextGroup.style.display = 'flex';
+        ruleTextGroup.style.flexDirection = 'column';
+        ruleTextGroup.style.flexShrink = '0';
+
+        // Display target name
+        const ruleTargetName = document.createElement('div');
+        ruleTargetName.textContent = presetType.charAt(0).toUpperCase() + presetType.slice(1) + ": " + target.name;
+        ruleTargetName.className = 'text';
+        ruleTextGroup.appendChild(ruleTargetName);
+        ruleTargetName.style.fontSize = '20px';
+
+        // Display preset name
+        const rulePresetName = document.createElement('div');
+        rulePresetName.textContent = preset.name;
+        rulePresetName.className = 'text-muted';
+        rulePresetName.style.fontSize = '12px';
+        ruleTextGroup.appendChild(rulePresetName);
+
+        ruleElement.appendChild(ruleTextGroup);
+
+        // SECTION 2: Rule Values
+        const ruleValuesGroup = document.createElement('div');
+        ruleValuesGroup.style.display = 'flex';
+        ruleValuesGroup.style.alignItems = 'center';
+        ruleValuesGroup.style.gap = '8px';
+        ruleValuesGroup.style.flex = '1';
+        ruleValuesGroup.style.minWidth = '0';
+        ruleValuesGroup.style.overflowX = 'auto';
+
+        // Match each stored value with its preset field definition
+        preset.fields.forEach((field, index) => {
+
+            const valueButton = document.createElement('button');
+            valueButton.type = 'button';
+            valueButton.textContent = `${field.label}: ${rule.values[index]}`;
+
+            // Display only
+            valueButton.style.flexShrink = '0';
+            valueButton.style.cursor = 'pointer';
+            valueButton.style.pointerEvents = "none";
+            valueButton.disabled = true;
+
+            ruleValuesGroup.appendChild(valueButton);
+        });
+
+        ruleElement.appendChild(ruleValuesGroup);
+
+        ruleElement.style.cursor = 'pointer';
+
+        ruleElement.addEventListener('click', () => {
+            window.data.deleteActiveRule(rule.id);
+            updateInactiveRulesList();
+            updateActiveRulesList();
+            updateActiveGamesAndRulesLabel();
+            updateSelectionSummary();
+        });
+        activeRulesList.appendChild(ruleElement);
+    });
+}
+
+function updateInactiveGamesList() {
+    gameSelectionInactiveGames.innerHTML = '';
+
+    const inactiveGamesList = window.data.games.filter(game =>
+        !window.data.activeGames.includes(game.id)
+    );
+
+    // Create an element for each game
+    inactiveGamesList.forEach(game => {
+
+        const gameElement = document.createElement('div');
+        gameElement.className = "column-card";
+        gameElement.style.display = "flex";
+        gameElement.style.alignItems = "center";
+        gameElement.style.gap = "12px";
+
+        // SECTION 1: Game Information
+        const gameTextGroup = document.createElement('div');
+        gameTextGroup.style.display = "flex";
+        gameTextGroup.style.flexDirection = "column";
+        gameTextGroup.style.flexShrink = "0";
+
+        // Display Name
+        const gameName = document.createElement('div');
+        gameName.textContent = game.name;
+        gameName.className = "text";
+        gameTextGroup.appendChild(gameName);
+
+        gameElement.appendChild(gameTextGroup);
+
+        // SECTION 2: Assigned Tags (Horizontally Scrollable)
+        const gameTagsGroup = document.createElement('div');
+        gameTagsGroup.style.display = "flex";
+        gameTagsGroup.style.alignItems = "center";
+        gameTagsGroup.style.gap = "8px";
+        gameTagsGroup.style.flex = "1";
+        gameTagsGroup.style.minWidth = "0";
+        gameTagsGroup.style.overflowX = "auto";
+        gameTagsGroup.style.whiteSpace = "nowrap";
+
+        // Find and display each tag assigned to this game
+        const assignedTags = window.data.tags.filter(tag =>
+            tag.games.includes(game.id)
+        );
+
+        assignedTags.forEach(tag => {
+            const tagButton = document.createElement('button');
+            tagButton.textContent = tag.name;
+            tagButton.type = "button";
+
+            // Optional: make these look like display-only tag buttons
+            tagButton.style.flexShrink = "0";
+            tagButton.style.cursor = "default";
+            tagButton.style.pointerEvents = "none";
+
+            gameTagsGroup.appendChild(tagButton);
+        });
+
+        gameElement.appendChild(gameTagsGroup);
+
+        gameElement.style.cursor = 'pointer';
+
+        gameElement.addEventListener('click', () => {
+            window.data.addActiveGame(game.id);
+            updateInactiveGamesList();
+            updateActiveGamesList();
+            updateActiveGamesAndRulesLabel();
+            updateSelectionSummary();
+        });
+        
+        gameSelectionInactiveGames.appendChild(gameElement);
+    });
+}
+
+function updateActiveGamesList() {
+    gameSelectionActiveGames.innerHTML = '';
+
+    const activeGamesList = window.data.games.filter(game =>
+        window.data.activeGames.includes(game.id)
+    );
+
+    // Create an element for each game
+    activeGamesList.forEach(game => {
+
+        const gameElement = document.createElement('div');
+        gameElement.className = "column-card";
+        gameElement.style.display = "flex";
+        gameElement.style.alignItems = "center";
+        gameElement.style.gap = "12px";
+
+        // SECTION 1: Game Information
+        const gameTextGroup = document.createElement('div');
+        gameTextGroup.style.display = "flex";
+        gameTextGroup.style.flexDirection = "column";
+        gameTextGroup.style.flexShrink = "0";
+
+        // Display Name
+        const gameName = document.createElement('div');
+        gameName.textContent = game.name;
+        gameName.className = "text";
+        gameTextGroup.appendChild(gameName);
+
+        gameElement.appendChild(gameTextGroup);
+
+        // SECTION 2: Assigned Tags (Horizontally Scrollable)
+        const gameTagsGroup = document.createElement('div');
+        gameTagsGroup.style.display = "flex";
+        gameTagsGroup.style.alignItems = "center";
+        gameTagsGroup.style.gap = "8px";
+        gameTagsGroup.style.flex = "1";
+        gameTagsGroup.style.minWidth = "0";
+        gameTagsGroup.style.overflowX = "auto";
+        gameTagsGroup.style.whiteSpace = "nowrap";
+
+        // Find and display each tag assigned to this game
+        const assignedTags = window.data.tags.filter(tag =>
+            tag.games.includes(game.id)
+        );
+
+        assignedTags.forEach(tag => {
+            const tagButton = document.createElement('button');
+            tagButton.textContent = tag.name;
+            tagButton.type = "button";
+
+            tagButton.style.flexShrink = "0";
+            tagButton.style.cursor = "default";
+            tagButton.style.pointerEvents = "none";
+            gameTagsGroup.appendChild(tagButton);
+        });
+
+        gameElement.appendChild(gameTagsGroup);
+
+        gameElement.style.cursor = 'pointer';
+
+        gameElement.addEventListener('click', () => {
+            window.data.deleteActiveGame(game.id);
+            updateInactiveGamesList();
+            updateActiveGamesList();
+            updateActiveGamesAndRulesLabel();
+            updateSelectionSummary();
+        });
+        
+        gameSelectionActiveGames.appendChild(gameElement);
+    });
+}
+
+function updateActiveGamesAndRulesLabel() {
+    const activeGamesLabel = document.getElementById('activeGamesLabel');
+    const activeRulesLabel = document.getElementById('activeRulesLabel');
+
+    activeGamesLabel.textContent = "Active Games: " + window.data.activeGames.length;
+    activeRulesLabel.textContent = "Active Rules: " + window.data.activeRules.length;
+}
+
+function updateSelectionSummaryWarningLabel(message){
+    if(!message) {
+        selectionSummaryView.style.display = "none";
+        selectionSummaryWarningsLabel.textContent = "";
+    }
+    else {
+        selectionSummaryView.style.display = "block";
+        selectionSummaryWarningsLabel.textContent = message;
+    }
+}
+
+function validateBetweenMinMaxValues() {
+    if(Number(generationOptionsMinInput.value) > Number(generationOptionsMaxInput.value)) {
+        generationOptionsMinCountLabel.textContent = "Min number of games cannot be greater than the Max";
+        generationOptionsMinCountLabel.style.color = getComputedStyle(document.documentElement).getPropertyValue('--warning').trim();
+        disableGenerateGamesButton();
+        return;
+    }
+    
+    generationOptionsMinCountLabel.textContent = "Minimum:";
+    generationOptionsMinCountLabel.style.color = getComputedStyle(document.documentElement).getPropertyValue('--text').trim();
+    updateSelectionSummary();
+}
+
+function getGameAmountRequirements() {
+    // Consolidate all active Game rules into amount requirements
+    const gameAmountRequirements = [];
+
+    const activeGameRules = window.data.rules.filter(rule =>
+        window.data.activeRules.includes(rule.id) &&
+        rule.targetType === "games"
+    );
+
+    activeGameRules.forEach(rule => {
+        // Find the game associated with this rule
+        const game = window.data.games.find(game => game.id === rule.targetId);
+
+        if (!game) return;
+
+        // Find existing requirements for this game
+        let requirement = gameAmountRequirements.find(item =>
+            item.id === game.id
+        );
+
+        // Create a new requirement if one doesn't exist
+        if (!requirement) {
+            requirement = {
+                id: game.id,
+                name: game.name,
+                tags: game.tags,
+                min: 0,
+                max: Infinity
+            };
+
+            gameAmountRequirements.push(requirement);
+        }
+
+        // Apply the rule
+        switch (rule.rulePresetDefId) {
+            case 1: // Must Include
+                requirement.min = Math.max(requirement.min, 1);
+                break;
+
+            case 3: // Maximum Amount
+                requirement.max = Math.min(
+                    requirement.max,
+                    Number(rule.values[0])
+                );
+                break;
+
+            case 4: // Minimum Amount
+                requirement.min = Math.max(
+                    requirement.min,
+                    Number(rule.values[0])
+                );
+                break;
+
+            case 5: // Between
+                requirement.min = Math.max(
+                    requirement.min,
+                    Number(rule.values[0])
+                );
+
+                requirement.max = Math.min(
+                    requirement.max,
+                    Number(rule.values[1])
+                );
+                break;
+        }
+    });
+
+    return gameAmountRequirements;
+}
+
+function getExcludedGames() {
+    // Get all games with an active Must Exclude rule
+    const excludedGames = window.data.rules.filter(rule =>
+        window.data.activeRules.includes(rule.id) &&
+        rule.targetType === "games" &&
+        rule.rulePresetDefId === 2
+    )
+        .map(rule => {
+            const game = window.data.games.find(game => game.id === rule.targetId);
+
+            if (!game) return null;
+
+            return {
+                id: game.id,
+                name: game.name,
+                tags: game.tags
+            };
+        })
+            .filter(game => game !== undefined);
+
+    return excludedGames;
+}
+
+function getTagAmountRequirements() {
+    const excludedGames = getExcludedGames();
+
+    // Get all active Tag rules and consolidate them
+    const activeTagRules = [];
+
+    const activeTagRuleDefinitions = window.data.rules.filter(rule =>
+        window.data.activeRules.includes(rule.id) &&
+        rule.targetType === "tags"
+    );
+
+    activeTagRuleDefinitions.forEach(rule => {
+        const tag = window.data.tags.find(tag => tag.id === rule.targetId);
+
+        if (!tag) return;
+
+        // Find existing entry for this tag
+        let tagRequirement = activeTagRules.find(item =>
+            item.id === tag.id
+        );
+
+        // Create entry if one doesn't exist
+        if (!tagRequirement) {
+            tagRequirement = {
+                id: tag.id,
+                name: tag.name,
+                games: tag.games
+                    .filter(gameId =>
+                        window.data.activeGames.includes(gameId) &&
+                        !excludedGames.some(game => game.id === gameId)
+                    )
+                    .map(gameId => window.data.games.find(game => game.id === gameId))
+                    .filter(game => game !== undefined)
+                    .map(game => game.name),
+                min: 0,
+                max: Infinity
+            };
+
+            activeTagRules.push(tagRequirement);
+        }
+
+        // Apply the rule
+        switch (rule.rulePresetDefId) {
+            case 1: // Must Include
+                tagRequirement.min = Math.max(tagRequirement.min, 1);
+                break;
+
+            case 3: // Maximum Amount
+                tagRequirement.max = Math.min(
+                    tagRequirement.max,
+                    Number(rule.values[0])
+                );
+                break;
+
+            case 4: // Minimum Amount
+                tagRequirement.min = Math.max(
+                    tagRequirement.min,
+                    Number(rule.values[0])
+                );
+                break;
+
+            case 5: // Between
+                tagRequirement.min = Math.max(
+                    tagRequirement.min,
+                    Number(rule.values[0])
+                );
+
+                tagRequirement.max = Math.min(
+                    tagRequirement.max,
+                    Number(rule.values[1])
+                );
+                break;
+        }
+    });
+    return activeTagRules;
+}
+
+function getExcludedTags() {
+    // Get all tags with an active Must Exclude rule
+    const excludedTags = window.data.rules
+        .filter(rule =>
+            window.data.activeRules.includes(rule.id) &&
+            rule.targetType === "tags" &&
+            rule.rulePresetDefId === 2
+        )
+            .map(rule => {
+                const tag = window.data.tags.find(tag => tag.id === rule.targetId);
+
+                if (!tag) return null;
+
+                return {
+                    id: tag.id,
+                    name: tag.name,
+                    games: tag.games
+                        .map(gameId => window.data.games.find(game => game.id === gameId))
+                        .filter(game => game !== undefined)
+                        .map(game => ({
+                            id: game.id,
+                            name: game.name,
+                            tags: game.tags
+                        }))
+                };
+            })
+                .filter(tag => tag !== null)
+                    .filter((tag, index, array) =>
+                        array.findIndex(item => item.id === tag.id) === index
+                    );
+
+    return excludedTags;
+}
+
+function calculateMinimumRequiredGames(withReplacement = false) {
+    const excludedGames = getExcludedGames();
+    const excludedTags = getExcludedTags();
+    const gameAmountRequirements = getGameAmountRequirements();
+    const tagAmountRequirements = getTagAmountRequirements();
+    
+     // Build the list of games that are eligible to be selected.
+    const gameConstraints = window.data.activeGames
+        .filter(gameId =>
+            !excludedGames.some(game => game.id === gameId) &&
+            !excludedTags.some(tag =>
+                tag.games.some(game => game.id === gameId)
+            )
+        )
+        .map(gameId => {
+            const requirement = gameAmountRequirements.find(game =>
+                game.id === gameId
+            );
+
+            return {
+                id: gameId,
+                min: requirement ? requirement.min : 0,
+                max: requirement ? requirement.max : Infinity
+            };
+        });
+
+    // Apply the one-instance limit when replacement is disabled.
+    for (const game of gameConstraints) {
+        if (!withReplacement) {
+            game.max = Math.min(game.max, 1);
+        }
+
+        if (game.min > game.max) {
+            return Infinity;
+        }
+    }
+
+    // Build tag constraints using eligible game IDs.
+    const tagConstraints = tagAmountRequirements
+        .map(tag => {
+            const originalTag = window.data.tags.find(item =>
+                item.id === tag.id
+            );
+
+            if (!originalTag) return null;
+
+            return {
+                id: tag.id,
+                name: tag.name,
+                min: tag.min,
+                max: tag.max,
+                gameIds: originalTag.games.filter(gameId =>
+                    gameConstraints.some(game => game.id === gameId)
+                )
+            };
+        })
+        .filter(tag => tag !== null);
+
+    for (const tag of tagConstraints) {
+        if (tag.min > tag.max) {
+            return Infinity;
+        }
+    }
+
+    let smallestSelection = Infinity;
+
+    // Tracks how many times each game has been selected.
+    const selectedGames = new Map();
+
+    // Prevents revisiting the same selection state.
+    const visited = new Set();
+
+    function getGameCount(gameId) {
+        return selectedGames.get(gameId) ?? 0;
+    }
+
+    function getTagCount(tag) {
+        return tag.gameIds.reduce(
+            (total, gameId) => total + getGameCount(gameId),
+            0
+        );
+    }
+
+    function findSmallestSelection(totalSelected) {
+        if (totalSelected >= smallestSelection) return;
+
+        // Create a unique key for the current selection state.
+        const stateKey = [...selectedGames.entries()]
+            .sort((a, b) => a[0] - b[0])
+            .map(([id, count]) => `${id}:${count}`)
+            .join(",");
+
+        if (visited.has(stateKey)) return;
+        visited.add(stateKey);
+
+        // Check individual game limits.
+        for (const game of gameConstraints) {
+            const selectedCount = getGameCount(game.id);
+
+            if (selectedCount > game.max) {
+                return;
+            }
+
+            // Individual game minimums must be satisfied first.
+            if (selectedCount < game.min) {
+                selectedGames.set(game.id, selectedCount + 1);
+
+                findSmallestSelection(totalSelected + 1);
+
+                // Undo the selection so other possibilities can be tested.
+                if (selectedCount === 0) {
+                    selectedGames.delete(game.id);
+                } else {
+                    selectedGames.set(game.id, selectedCount);
+                }
+
+                return;
+            }
+        }
+
+        // Find a tag whose minimum requirement is not yet satisfied.
+        let mostConstrainedTag = null;
+
+        for (const tag of tagConstraints) {
+            const selectedCount = getTagCount(tag);
+
+            if (selectedCount > tag.max) {
+                return;
+            }
+
+            const needed = tag.min - selectedCount;
+
+            if (needed <= 0) continue;
+
+            const availableGames = tag.gameIds.filter(gameId => {
+                const game = gameConstraints.find(item =>
+                    item.id === gameId
+                );
+
+                return game && getGameCount(gameId) < game.max;
+            });
+
+            if (availableGames.length === 0) {
+                return;
+            }
+
+            if (
+                !mostConstrainedTag ||
+                availableGames.length < mostConstrainedTag.availableGames.length
+            ) {
+                mostConstrainedTag = {
+                    tag,
+                    availableGames,
+                    needed
+                };
+            }
+        }
+
+        // All minimum requirements have been satisfied.
+        if (!mostConstrainedTag) {
+            smallestSelection = totalSelected;
+            return;
+        }
+
+        // Try each available game as the next selection.
+        for (const gameId of mostConstrainedTag.availableGames) {
+            const selectedCount = getGameCount(gameId);
+
+            selectedGames.set(gameId, selectedCount + 1);
+
+            findSmallestSelection(totalSelected + 1);
+
+            // Undo the selection before trying the next game.
+            if (selectedCount === 0) {
+                selectedGames.delete(gameId);
+            } else {
+                selectedGames.set(gameId, selectedCount);
+            }
+        }
+    }
+
+    findSmallestSelection(0);
+
+    return smallestSelection;
+}
+
+function updateSelectionSummary() {
+    disableGenerateGamesButton();
+
+    const gameAmountRequirements = getGameAmountRequirements();
+    const excludedGames = getExcludedGames();
+    const tagAmountRequirements = getTagAmountRequirements();
+    const excludedTags = getExcludedTags();
+    minimumGamesToSatifyAllRulesLabel.textContent = "Minimum Games needed to satisfy all rules: X";
+    window.minimumGamesToSatifyAllRules = 0;
+
+    // If With Replacement is not checked, no game can require more than 1 copy of itself
+    {
+        if(!generationOptionsWithReplacementCheckbox.checked) {
+            for (const game of gameAmountRequirements) {
+                if(game.min > 1) {
+                    updateSelectionSummaryWarningLabel(game.name + " has a minimum requirement of " + game.min + " but With Replacement is not checked");
+                    return;
+                }
+            }
+        }
+    }
+
+    // If With Replacement is not checked, min game count must be at least the number of active games
+    {
+        if(!generationOptionsWithReplacementCheckbox.checked) {
+            // For exact count, there must be enough active games to fufill the requested game count
+            if(generationOptionsExactlyRadioButton.checked) {
+                if(window.data.activeGames.length < Number(generationOptionsExactlyInput.value)) {
+                    updateSelectionSummaryWarningLabel("The requested game count is " + generationOptionsExactlyInput.value + " but there are only " + window.data.activeGames.length + " active games");
+                    return;
+                }
+            }
+            // For between count, there must be enough active games to fufill the minimum game count
+            else if(generationOptionsBetweenRadioButton.checked) {
+                if(window.data.activeGames.length < Number(generationOptionsMinInput.value)) {
+                    updateSelectionSummaryWarningLabel("The requested game count is " + generationOptionsMinInput.value + " but there are only " + window.data.activeGames.length + " active games");
+                    return;
+                }
+            }
+        }
+    }
+
+    // Any game with a min requirement must be an active game
+    {
+        for (const game of gameAmountRequirements) {
+            if (game.min > 0) {
+                const isActive = window.data.activeGames.some(activeGame =>
+                    activeGame === game.id
+                );
+
+                if (!isActive) {
+                    updateSelectionSummaryWarningLabel(
+                        game.name + " must be an active game because it has a minimum requirement of " + game.min
+                    );
+                    return;
+                }
+            }
+        }
+    }
+
+    // Any game with a min requirement must not be excluded
+    {
+        for (const excludedGame of excludedGames) {
+            const requirement = gameAmountRequirements.find(game =>
+                game.id === excludedGame.id
+            );
+
+            if (requirement && requirement.min > 0) {
+                updateSelectionSummaryWarningLabel(
+                    excludedGame.name + " is both excluded and has a minimum requirement of " + requirement.min
+                );
+                return;
+            }
+        }
+        }
+
+    // Any game with a min and max requriement must have the min must not exceed the max
+    {
+        for (const game of gameAmountRequirements) {
+            if (game.min > 0 && game.max != Infinity) {
+                if (game.min > game.max) {
+                    updateSelectionSummaryWarningLabel(
+                        game.name + " has a minimum requirement of " + game.min + " which exceeds it's own max requirement of " + game.max
+                    );
+                    return;
+                }
+            }
+        }
+    }
+
+    // Required games total amount must be within allowable limits
+    {
+        var totalRequiredGames = 0;
+        gameAmountRequirements.forEach(game => 
+            totalRequiredGames += game.min
+        );
+
+        // No Replacement Logic
+        if(!generationOptionsWithReplacementCheckbox.checked) {
+           // Total required games cannot exceed amonut of unique active games
+            if(totalRequiredGames > window.data.activeGames.length) {
+                updateSelectionSummaryWarningLabel("The combined rules require " + totalRequiredGames + " active games but there are only " + window.data.activeGames.length + " active");
+                return;
+            }
+            // For exact count, total required games cannot exeed the requested game count
+            if(generationOptionsExactlyRadioButton.checked) {
+                if(totalRequiredGames > Number(generationOptionsExactlyInput.value)) {
+                    updateSelectionSummaryWarningLabel("The combined rules require " + totalRequiredGames + " active games but the requrested game count is only " + generationOptionsExactlyInput.value);
+                    return;
+                }
+            }
+            // For between count, total required games cannot be more than the maximum
+            else if(generationOptionsBetweenRadioButton.checked) {
+                if(totalRequiredGames > Number(generationOptionsMaxInput.value)) {
+                    updateSelectionSummaryWarningLabel("The combined rules require " + totalRequiredGames + " active games but the max amount of games allowed is " + generationOptionsMaxInput.value);
+                    return;
+                }
+            }
+        }
+
+        // With Replacement Logic
+        else {
+            // For exact count, total required games cannot exeed the requested game count
+            if(generationOptionsExactlyRadioButton.checked) {
+                if(totalRequiredGames > Number(generationOptionsExactlyInput.value)) {
+                    updateSelectionSummaryWarningLabel("The combined rules require " + totalRequiredGames + " active games but the requrested game count is only " + generationOptionsExactlyInput.value);
+                    return;
+                }
+            }
+            // For between count, total required games cannot be more than the maximum
+            else if(generationOptionsBetweenRadioButton.checked) {
+                if(totalRequiredGames > Number(generationOptionsMaxInput.value)) {
+                    updateSelectionSummaryWarningLabel("The combined rules require " + totalRequiredGames + " active games but the max amount of games allowed is " + generationOptionsMaxInput.value);
+                    return;
+                }
+            }
+        }
+    }
+
+    // There must be enough games associated with each tag to satisfy the requirements
+    {
+        for(const tag of tagAmountRequirements) {
+            // No Replacement Logic
+            if(!generationOptionsWithReplacementCheckbox.checked) {
+                if(tag.min > tag.games.length) {
+                    updateSelectionSummaryWarningLabel("Tag " + tag.name + " has a minimum requirement of " + tag.min + " but there are only " + tag.games.length + " games to pick from after exclusions");
+                    return;
+                }
+            }
+            // With Replacement Logic
+            else {
+                if(tag.min > 0 && tag.games.length === 0) {
+                    updateSelectionSummaryWarningLabel("Tag " + tag.name + " has a minimum requirement of " + tag.min + " but there are " + tag.games.length + " games to pick from after exclusions");
+                    return;
+                }
+            }
+        }
+    }
+
+    // No tag rules must have a minimum greater than their max
+    {
+        for(const tag of tagAmountRequirements) {
+            // No Replacement Logic
+            if(tag.min > tag.max) {
+                updateSelectionSummaryWarningLabel("Tag " + tag.name + " has a minimum requirement of " + tag.min + " that exceeds it's maximum requirement of " + tag.max);
+                return;
+            }
+        }
+    }
+
+    // Required tag total amount must be within allowable limits
+    {
+        var totalRequiredGames = 0;
+
+        // No Replacement Logic
+        if(!generationOptionsWithReplacementCheckbox.checked) {
+            totalRequiredGames = calculateMinimumRequiredGames(false);
+            if(totalRequiredGames === Infinity) {
+                updateSelectionSummaryWarningLabel("There is no possible solution with your combined tag and game rules");
+                return;
+            }
+
+            // For exact count, total required games cannot exeed the requested game count
+            if(generationOptionsExactlyRadioButton.checked) {
+                if(totalRequiredGames > Number(generationOptionsExactlyInput.value)) {
+                    updateSelectionSummaryWarningLabel("The combined rules require " + totalRequiredGames + " active games but the requrested game count is only " + generationOptionsExactlyInput.value);
+                    return;
+                }
+            }
+            // For between count, total required games cannot be more than the maximum
+            else if(generationOptionsBetweenRadioButton.checked) {
+                if(totalRequiredGames > Number(generationOptionsMaxInput.value)) {
+                    updateSelectionSummaryWarningLabel("The combined rules require " + totalRequiredGames + " active games but the max amount of games allowed is " + generationOptionsMaxInput.value);
+                    return;
+                }
+            }
+        }
+
+        // With Replacement Logic
+        else {
+            totalRequiredGames = calculateMinimumRequiredGames(true);
+            if(totalRequiredGames === Infinity) {
+                updateSelectionSummaryWarningLabel("There is no possible solution with your combined tag and game rules");
+                return;
+            }
+
+            // For exact count, total required games cannot exeed the requested game count
+            if(generationOptionsExactlyRadioButton.checked) {
+                if(totalRequiredGames > Number(generationOptionsExactlyInput.value)) {
+                    updateSelectionSummaryWarningLabel("The combined rules require " + totalRequiredGames + " active games but the requrested game count is only " + generationOptionsExactlyInput.value);
+                    return;
+                }
+            }
+            // For between count, total required games cannot be more than the maximum
+            else if(generationOptionsBetweenRadioButton.checked) {
+                if(totalRequiredGames > Number(generationOptionsMaxInput.value)) {
+                    updateSelectionSummaryWarningLabel("The combined rules require " + totalRequiredGames + " active games but the max amount of games allowed is " + generationOptionsMaxInput.value);
+                    return;
+                }
+            }
+        }
+
+        window.minimumGamesToSatifyAllRules = totalRequiredGames;
+        minimumGamesToSatifyAllRulesLabel.textContent = "Minimum Games needed to satisfy all rules: " + totalRequiredGames;
+    }
+
+    updateSelectionSummaryWarningLabel(null);
+    enableGenerateGamesButton();
+}
+
+function updateClearGamesButton() {
+    if(window.data.pickedGames.length > 0) {
+        clearGamesButton.setAttribute('aria-selected', 'true');
+        clearGamesButton.className = "button-remove";
+    }
+    else {
+        clearGamesButton.setAttribute('aria-selected', 'false');
+        clearGamesButton.className = "button-disabled";
+    }
+}
+
+function generateGames() {
+
+    const withReplacement = generationOptionsWithReplacementCheckbox.checked;
+
+    var numberOfGamesToPick = 0;
+    if (generationOptionsExactlyRadioButton.checked) {
+        numberOfGamesToPick = Number(generationOptionsExactlyInput.value);
+    }
+    else {
+        const requestedMin = Number(generationOptionsMinInput.value);
+        const requestedMax = Number(generationOptionsMaxInput.value);
+
+        const effectiveMin = Math.max(requestedMin, window.minimumGamesToSatifyAllRules);
+
+        const effectiveMax = generationOptionsWithReplacementCheckbox.checked
+            ? requestedMax
+            : Math.min(requestedMax, window.data.activeGames.length);
+
+        numberOfGamesToPick = Math.floor(Math.random() * (effectiveMax - effectiveMin + 1)) + effectiveMin;
+    }
+
+    const gameAmountRequirements = getGameAmountRequirements();
+    const excludedGames = getExcludedGames();
+    const tagAmountRequirements = getTagAmountRequirements();
+    const excludedTags = getExcludedTags();
+
+    // Build the eligible game list.
+    const gameConstraints = window.data.activeGames
+        .filter(gameId =>
+            !excludedGames.some(game => game.id === gameId) &&
+            !excludedTags.some(tag =>
+                tag.games.some(game => game.id === gameId)
+            )
+        )
+        .map(gameId => {
+            const requirement = gameAmountRequirements.find(game =>
+                game.id === gameId
+            );
+
+            return {
+                id: gameId,
+                min: requirement ? requirement.min : 0,
+                max: requirement ? requirement.max : Infinity
+            };
+        });
+
+    // Without replacement, a game can only be selected once.
+    for (const game of gameConstraints) {
+        if (!withReplacement) {
+            game.max = Math.min(game.max, 1);
+        }
+    }
+
+    // Build tag constraints using game IDs.
+    const tagConstraints = tagAmountRequirements
+        .map(tag => {
+            const originalTag = window.data.tags.find(item =>
+                item.id === tag.id
+            );
+
+            if (!originalTag) return null;
+
+            return {
+                id: tag.id,
+                min: tag.min,
+                max: tag.max,
+                gameIds: originalTag.games.filter(gameId =>
+                    gameConstraints.some(game => game.id === gameId)
+                )
+            };
+        })
+        .filter(tag => tag !== null);
+
+    // Track how many times each game has been selected.
+    const selectedGames = new Map();
+
+    function getGameCount(gameId) {
+        return selectedGames.get(gameId) ?? 0;
+    }
+
+    function getTagCount(tag) {
+        return tag.gameIds.reduce(
+            (total, gameId) => total + getGameCount(gameId),
+            0
+        );
+    }
+
+    // Randomly shuffle an array using Fisher-Yates.
+    function shuffle(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+
+        return array;
+    }
+
+    // Check whether a game can be selected without breaking a maximum.
+    function canSelectGame(gameId) {
+        const game = gameConstraints.find(item => item.id === gameId);
+
+        if (!game || getGameCount(gameId) >= game.max) {
+            return false;
+        }
+
+        // Check every tag that this game belongs to.
+        for (const tag of tagConstraints) {
+            if (
+                tag.gameIds.includes(gameId) &&
+                getTagCount(tag) >= tag.max
+            ) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    // Check whether the remaining selections can still satisfy all minimums.
+    function isStillPossible(remainingSlots) {
+
+        let totalGameMinimumsNeeded = 0;
+
+        for (const game of gameConstraints) {
+            const needed = game.min - getGameCount(game.id);
+
+            if (needed > 0) {
+                totalGameMinimumsNeeded += needed;
+            }
+        }
+
+        if (totalGameMinimumsNeeded > remainingSlots) {
+            return false;
+        }
+
+        // Check whether each tag still has enough possible selections.
+        for (const tag of tagConstraints) {
+            const needed = tag.min - getTagCount(tag);
+
+            if (needed <= 0) continue;
+
+            if (needed > remainingSlots) {
+                return false;
+            }
+
+            let availableCapacity = 0;
+
+            for (const gameId of tag.gameIds) {
+                const game = gameConstraints.find(item =>
+                    item.id === gameId
+                );
+
+                availableCapacity += Math.max(
+                    0,
+                    game.max - getGameCount(gameId)
+                );
+            }
+
+            // The tag's own maximum also limits its available capacity.
+            availableCapacity = Math.min(
+                availableCapacity,
+                tag.max - getTagCount(tag)
+            );
+
+            if (availableCapacity < needed) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    // Keep track of states we've already explored.
+    const visited = new Set();
+
+    function findSelection(totalSelected) {
+
+        const remainingSlots = numberOfGamesToPick - totalSelected;
+
+        // Have we picked the requested number of games?
+        if (remainingSlots === 0) {
+            return gameConstraints.every(game =>
+                getGameCount(game.id) >= game.min
+            ) && tagConstraints.every(tag =>
+                getTagCount(tag) >= tag.min
+            );
+        }
+
+        if (!isStillPossible(remainingSlots)) {
+            return false;
+        }
+
+        // Identify the current selection state.
+        const stateKey = [...selectedGames.entries()]
+            .sort((a, b) => a[0] - b[0])
+            .map(([id, count]) => `${id}:${count}`)
+            .join(",");
+
+        if (visited.has(stateKey)) {
+            return false;
+        }
+
+        visited.add(stateKey);
+
+        let candidates = [];
+
+        // First priority: satisfy individual game minimums.
+        const requiredGame = gameConstraints.find(game =>
+            getGameCount(game.id) < game.min
+        );
+
+        if (requiredGame) {
+            candidates = [requiredGame.id];
+        }
+        else {
+            // Second priority: satisfy tag minimums.
+            let mostConstrainedTag = null;
+
+            for (const tag of tagConstraints) {
+                if (getTagCount(tag) >= tag.min) continue;
+
+                const availableGames = tag.gameIds.filter(gameId =>
+                    canSelectGame(gameId)
+                );
+
+                if (
+                    !mostConstrainedTag ||
+                    availableGames.length < mostConstrainedTag.length
+                ) {
+                    mostConstrainedTag = availableGames;
+                }
+            }
+
+            if (mostConstrainedTag !== null) {
+                candidates = mostConstrainedTag;
+            }
+            else {
+                // No minimums remain. Fill the remaining slots with any
+                // eligible games that don't violate maximums.
+                candidates = gameConstraints
+                    .filter(game => canSelectGame(game.id))
+                    .map(game => game.id);
+            }
+        }
+
+        // Try candidates in random order.
+        shuffle(candidates);
+
+        for (const gameId of candidates) {
+
+            if (!canSelectGame(gameId)) continue;
+
+            const previousCount = getGameCount(gameId);
+
+            selectedGames.set(gameId, previousCount + 1);
+
+            if (findSelection(totalSelected + 1)) {
+                return true;
+            }
+
+            // Undo this selection and try another possibility.
+            if (previousCount === 0) {
+                selectedGames.delete(gameId);
+            }
+            else {
+                selectedGames.set(gameId, previousCount);
+            }
+        }
+
+        return false;
+    }
+
+    // Generate the selection.
+    if (!findSelection(0)) {
+        return [];
+    }
+
+    // Convert the selected game IDs into game names.
+    const result = [];
+
+    for (const [gameId, count] of selectedGames) {
+        const game = window.data.games.find(item => item.id === gameId);
+
+        if (game) {
+            for (let i = 0; i < count; i++) {
+                result.push(game.name);
+            }
+        }
+    }
+
+    var pickedGames = shuffle(result);
+    pickedGames = pickedGames.sort();
+    window.data.updatePickedGames(pickedGames);
+}
+
+function updatePickedGamesView() {
+
+    const pickedGamesList = document.getElementById('pickedGamesList');
+    pickedGamesList.innerHTML = '';
+
+    var pickedGames = window.data.pickedGames;
+    if(pickedGames.length === 0){
+        pickedGamesView.hidden = true;
+    }
+    else {
+        pickedGamesView.hidden = false;
+    }
+
+    pickedGames.forEach((gameName, index) => {
+        const gameElement = document.createElement('div');
+        gameElement.className = 'picked-game';
+
+        const numberBadge = document.createElement('div');
+        numberBadge.className = 'picked-game-number';
+        numberBadge.textContent = index + 1;
+
+        const gameNameElement = document.createElement('div');
+        gameNameElement.className = 'picked-game-name';
+        gameNameElement.textContent = gameName;
+
+        gameElement.appendChild(numberBadge);
+        gameElement.appendChild(gameNameElement);
+
+        pickedGamesList.appendChild(gameElement);
+    });
+}
+
+updateInactiveGamesList();
+updateActiveGamesList();
+updateInactiveRulesList();
+updateActiveRulesList();
+updateActiveGamesAndRulesLabel();
+updateSelectionSummary();
+updateClearGamesButton();
+updatePickedGamesView();
+
+    </script>
+
+</body>

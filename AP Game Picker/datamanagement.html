@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>games.html</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+
+<body>
+    <header>
+        <a href="main.html" class="back-home">
+            <span aria-hidden="true">←</span> Back to Home
+        </a>
+  
+        <h1>🛠 Data Management</h1>
+        <div class="text-muted">Manage your games and tags!</div>
+        <div class="border-bottom"></div>
+    </header>
+
+    <main>
+        <section class="tools">
+            <article class="tool-card">
+                <div class="tool-heading">
+                    <h2 class="tool-title">Export Data</h2>
+                </div>
+                <p>Export your data to a file</p>
+                <button id="exportDataButton" type="button" class="button-active" aria-selected="true">Export Data</button>
+            </article>
+
+            <article class="tool-card">
+                <div class="tool-heading">
+                    <h2 class="tool-title">Import Data</h2>
+                </div>
+                <p>Import your data from a file</p>
+                <button id="importDataButton" type="button" class="button-active" aria-selected="true">Import Data</button>
+            </article>
+
+            <article class="tool-card">
+                <div class="tool-heading">
+                    <h2 class="tool-title">Clear Cache</h2>
+                </div>
+                <p>Clear you browser cache</p>
+                <p>WARNING! THIS WILL ERASE ALL YOUR DATA</p>
+                <button id="clearCacheButton" class="button-remove" type="button">Clear All Data</button>
+            </article>
+
+        </section>
+    </main>
+
+    <script src="js/data.js"></script>
+    <script src="js/games.js"></script>
+
+    <script>
+
+const exportDataButton = document.getElementById('exportDataButton');
+const importDataButton = document.getElementById('importDataButton');
+const clearCacheButton = document.getElementById('clearCacheButton');
+
+exportDataButton.addEventListener('click', exportData);
+importDataButton.addEventListener('click', importData);
+clearCacheButton.addEventListener('click', clearAppCache);
+
+async function exportData() {
+
+    // Collect data to export
+    const exportObject = {
+        version: 1,
+        exportedAt: new Date().toISOString(),
+        games: window.data.games,
+        tags: window.data.tags,
+        rules: window.data.rules,
+        activeGames: window.data.activeGames,
+        activeRules: window.data.activeRules,
+        pickedGames: window.data.pickedGames
+    };
+
+    // Convert data into formatted JSON
+    const json = JSON.stringify(exportObject, null, 4);
+
+    // Generate a filename with today's date
+    const date = new Date().toISOString().slice(0, 10);
+    const filename = `archipelago-tools-data.json`;
+
+    // Use the Save As dialog if supported
+    if (window.showSaveFilePicker) {
+        try {
+            const fileHandle = await window.showSaveFilePicker({
+                suggestedName: filename,
+                types: [{
+                    description: 'JSON Data File',
+                    accept: {
+                        'application/json': ['.json']
+                    }
+                }]
+            });
+
+            const writable = await fileHandle.createWritable();
+            await writable.write(json);
+            await writable.close();
+
+            return;
+
+        } catch (error) {
+            // User cancelled the dialog
+            if (error.name === 'AbortError') return;
+
+            console.error('Export failed:', error);
+            alert('Something went wrong while exporting your data.');
+            return;
+        }
+    }
+
+    // Fallback: trigger a normal browser download
+    const blob = new Blob([json], {
+        type: 'application/json'
+    });
+
+    const url = URL.createObjectURL(blob);
+    const downloadLink = document.createElement('a');
+
+    downloadLink.href = url;
+    downloadLink.download = filename;
+    downloadLink.click();
+
+    URL.revokeObjectURL(url);
+}
+
+async function importData() {
+
+    let file;
+
+    // Try to use the native file picker
+    if (window.showOpenFilePicker) {
+        try {
+            const [fileHandle] = await window.showOpenFilePicker({
+                multiple: false,
+                types: [{
+                    description: 'JSON Data File',
+                    accept: {
+                        'application/json': ['.json']
+                    }
+                }]
+            });
+
+            file = await fileHandle.getFile();
+
+        } catch (error) {
+            // User cancelled the dialog
+            if (error.name === 'AbortError') return;
+
+            console.error('File selection failed:', error);
+            alert('Unable to open the file picker.');
+            return;
+        }
+
+    } 
+    else {
+        // Fallback for browsers without the File System Access API
+        file = await new Promise(resolve => {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.json,application/json';
+
+            input.addEventListener('change', () => {
+                resolve(input.files[0] || null);
+            }, { once: true });
+
+            input.click();
+        });
+    }
+
+    // No file was selected
+    if (!file) return;
+
+    try {
+        // Read and parse the JSON file
+        const fileContents = await file.text();
+        const importedData = JSON.parse(fileContents);
+
+        // Validate the backup structure
+        if (
+            importedData.version !== 1 ||
+            !Array.isArray(importedData.games) ||
+            !Array.isArray(importedData.tags) ||
+            !Array.isArray(importedData.rules)
+        ) {
+            alert('This file does not appear to be a valid Archipelago backup.');
+            return;
+        }
+
+        // Validate games
+        const validGames = importedData.games.every(game =>
+            game &&
+            Number.isSafeInteger(game.id) &&
+            typeof game.name === 'string' &&
+            Array.isArray(game.tags)
+        );
+
+        // Validate tags
+        const validTags = importedData.tags.every(tag =>
+            tag &&
+            Number.isSafeInteger(tag.id) &&
+            typeof tag.name === 'string' &&
+            Array.isArray(tag.games)
+        );
+
+        // Validate rules
+        const validRules = importedData.rules.every(rule =>
+            rule &&
+            Number.isSafeInteger(rule.id) &&
+            typeof rule.targetType === 'string' &&
+            Number.isSafeInteger(rule.targetId) &&
+            Number.isSafeInteger(rule.rulePresetDefId) &&
+            Array.isArray(rule.values)
+        );
+
+        // Validate activeGames
+        const validActiveGames = Array.isArray(importedData.activeGames) &&
+            importedData.activeGames.every(gameId =>
+                Number.isSafeInteger(gameId)
+        );
+
+        // Validate activeRules
+        const validActiveRules = Array.isArray(importedData.activeRules) &&
+            importedData.activeRules.every(ruleId =>
+                Number.isSafeInteger(ruleId)
+        );
+
+        // Validate pickedGames
+        const validPickedGames = Array.isArray(importedData.pickedGames) &&
+            importedData.pickedGames.every(gameName =>
+                typeof gameName === 'string'
+        );
+
+        if (!validGames || !validTags || !validRules ||
+            !activeGames || !activeRules || !pickedGames
+        ) {
+            alert('The backup contains invalid entries.');
+            return;
+        }
+
+        // Confirm replacement
+        const confirmed = confirm(
+            `Import ${importedData.games.length} games, ` +
+            `${importedData.tags.length} tags ` +
+            `${importedData.rules.length} rules ` +
+            `${importedData.activeGames.length} active rules ` +
+            `${importedData.activeRules.length} active games ` +
+            `${importedData.pickedGames.length} picked games?\n\n` +
+            'This will replace all currentvalues for these entries.'
+        );
+
+        if (!confirmed) return;
+
+        // Replace existing data while preserving the original arrays
+        window.data.games.splice(
+            0,
+            window.data.games.length,
+            ...importedData.games
+        );
+
+        window.data.tags.splice(
+            0,
+            window.data.tags.length,
+            ...importedData.tags
+        );
+
+        window.data.rules.splice(
+            0,
+            window.data.rules.length,
+            ...importedData.rules
+        );
+
+        window.data.activeRules.splice(
+            0,
+            window.data.activeRules.length,
+            ...importedData.activeRules
+        );
+
+        window.data.activeGames.splice(
+            0,
+            window.data.activeGames.length,
+            ...importedData.activeGames
+        );
+
+        window.data.pickedGames.splice(
+            0,
+            window.data.pickedGames.length,
+            ...importedData.pickedGames
+        );
+
+        // Save imported data
+        window.data.saveData();
+
+        alert('Data imported successfully!');
+
+    } catch (error) {
+        console.error('Import failed:', error);
+        alert('Something went wrong while importing the backup file.');
+    }
+}
+
+async function clearAppCache() {
+
+    // First confirmation
+    const firstConfirm = confirm(
+        "Are you sure you want to clear all application data?"
+    );
+
+    if (!firstConfirm) return;
+
+    // Clear games
+    window.data.games.splice(0, window.data.games.length);
+
+    // Clear existing tags
+    window.data.tags.splice(0, window.data.tags.length);
+
+    // Clear existing rules
+    window.data.rules.splice(0, window.data.rules.length);
+
+    // Clear existing active rules
+    window.data.activeRules.splice(0, window.data.activeRules.length);
+
+    // Clear existing active games
+    window.data.activeGames.splice(0, window.data.activeGames.length);
+
+    // Clear existing picked games
+    window.data.pickedGames.splice(0, window.data.pickedGames.length);
+
+    // Save the reset data
+    window.data.saveData();
+
+    // Clear Cache Storage
+    if ('caches' in window) {
+        const cacheKeys = await caches.keys();
+
+        await Promise.all(
+            cacheKeys.map(cacheName => caches.delete(cacheName))
+        );
+    }
+
+    alert("All application data has been cleared!");
+}
+
+// Connect button
+document.getElementById('clearCacheButton')
+    .addEventListener('click', clearAppCache);
+    </script>
+
+</body>

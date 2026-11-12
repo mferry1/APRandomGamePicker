@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>rulesettings.html</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+
+<body>
+    <header>
+        <a href="main.html" class="back-home">
+            <span aria-hidden="true">←</span> Back to Home
+        </a>
+  
+        <h1>⚙️ Rule Settings</h1>
+        <div class="text-muted">Manage rules for your games and tags to customize how games are selected when using the game picker</div>
+        <div class="border-bottom"></div>
+    </header>
+
+    <main>
+        <section class="card">
+            <h2>Add a New Rule</h2>
+            <p class="section-description">Choose what the rule applies to, select a game or tag, and pick a rule preset.</p>
+
+            <form id="ruleForm">
+                <div class="toolbar">
+                    <div>
+                        <label for="ruleAppliesToSelect">Rule applies to</label>
+                        <select id="ruleAppliesToSelect">
+                            <option value="games">Games</option>
+                            <option value="tags">Tags</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label for="chooseAGameOrTagSelect">Choose a game or tag</label>
+                        <select id="chooseAGameOrTagSelect"></select>
+                    </div>
+                </div>
+
+                <div class="toolbar">
+                    <div>
+                        <label for="rulePresetSelect">Rule preset</label>
+                        <select id="rulePresetSelect" required></select>
+                    </div>
+
+                    <div id="ruleDefinition">
+                        <label for="ruleDefinitionPlaceholder">Rule definition</label>
+                        <div id="ruleDefinitionPlaceholder"></div>
+                    </div>
+                </div>
+                    
+                <div>
+                    <label id="addRuleButtonWarningLabel" style="display: block; color: var(--warning);"></label>
+                    <button id="addRuleButton" type="button">Add Rule</button>
+                </div>
+
+            </form>
+        </section>
+
+        <section class="card">
+            <div class="toolbar">
+                <h2 id="currentRulesLabel" style="margin-bottom: 4px;">Current Rules (X):</h2>
+                
+                <input id="rulesSearchInput" placeholder="Search rules...">
+                    <select id="rulesSearchSelect">
+                        <option value="games">Search Games</option>
+                        <option value="tags">Seach Tags</option>
+                    </select>
+                </input>
+            </div>
+            <p style="margin-top: 0;">You will be able to select from these rules when using the game picker</p>
+            <div id="currentRulesList"></div>
+        </section>
+
+        <p class="text-muted" style="font-size:12px;text-align:center">Changes are saved locally in this browser cache. Export backups regularly.</p>
+    </main>
+
+    <script src="js/data.js"></script>
+    <script src="js/games.js"></script>
+
+    <script>
+
+const ruleAppliesToSelect = document.getElementById('ruleAppliesToSelect');
+const chooseAGameOrTagSelect = document.getElementById('chooseAGameOrTagSelect');
+const rulePresetSelect = document.getElementById('rulePresetSelect');
+const addRuleButton = document.getElementById('addRuleButton');
+const rulesSearchInput = document.getElementById('rulesSearchInput');
+const rulesSearchSelect = document.getElementById('rulesSearchSelect');
+
+ruleAppliesToSelect.addEventListener('change', () => {
+    updateChooseAGameOrTagSelect();
+    updateRulePresetSelect();
+    updateRuleDefinitionSelect();
+    checkForValidRule();
+});
+
+chooseAGameOrTagSelect.addEventListener('change', () => {
+    checkForValidRule();
+});
+
+rulePresetSelect.addEventListener('change', () => {
+    updateRuleDefinitionSelect();
+    checkForValidRule();
+});
+
+addRuleButton.addEventListener('click', () => {
+    const targetType = ruleAppliesToSelect.value;
+    const targetId = Number(chooseAGameOrTagSelect.value);
+    const rulePresetId = Number(rulePresetSelect.value);
+
+    const values = [];
+    if(rulePresetId === 3 || rulePresetId === 4) {
+        const value = Number(document.getElementById('ruleDefinition-limit').value);
+        values.push(value);
+    }
+    else if(rulePresetId === 5) {
+        const min = Number(document.getElementById('ruleDefinition-min').value);
+        const max = Number(document.getElementById('ruleDefinition-max').value);
+
+        values.push(min);
+        values.push(max);
+    }
+
+    window.data.createRule(targetType, targetId, rulePresetId, values);
+    checkForValidRule();
+    updateCurrentRulesList();
+});
+
+rulesSearchInput.addEventListener('input', () => {
+    updateCurrentRulesList();
+});
+
+rulesSearchSelect.addEventListener('change', () => {
+    updateCurrentRulesList();
+});
+
+function enableAddRuleButton() {
+    addRuleButton.classList.remove('button-disabled');
+}
+
+function disableAddRuleButton() {
+    addRuleButton.classList.add('button-disabled');
+}
+
+function updateChooseAGameOrTagSelect() {
+    // Clear existing options
+    chooseAGameOrTagSelect.innerHTML = '';
+
+    // Populate new options
+    if (ruleAppliesToSelect.value === 'games') {
+        // Update 'Choose a game or tag' Select
+        window.data.games.forEach(game => {
+            const option = document.createElement('option');
+
+            option.value = game.id;
+            option.textContent = game.name;
+
+            chooseAGameOrTagSelect.appendChild(option);
+        });
+    }
+    else {
+        window.data.tags.forEach(tag => {
+            const option = document.createElement('option');
+
+            option.value = tag.id;
+            option.textContent = tag.name;
+
+            chooseAGameOrTagSelect.appendChild(option);
+        });
+    }
+}
+
+function updateRulePresetSelect() {
+// Clear existing options
+    rulePresetSelect.innerHTML = '';
+
+    // Populate new options
+    if (ruleAppliesToSelect.value === 'games') {
+        // Update 'Rule Preset' Select
+        window.data.RULEPRESETDEFS.game.forEach(gameRule => {
+            const option = document.createElement('option');
+
+            option.value = gameRule.id;
+            option.textContent = gameRule.name;
+
+            rulePresetSelect.appendChild(option);
+        });
+
+    }
+    else {
+        window.data.RULEPRESETDEFS.tag.forEach(tagRule => {
+            const option = document.createElement('option');
+
+            option.value = tagRule.id;
+            option.textContent = tagRule.name;
+
+            rulePresetSelect.appendChild(option);
+        });
+    }
+}
+
+function updateRuleDefinitionSelect() {
+    addRuleButtonWarningLabel.textContent = '';
+
+    const ruleDefinitionPlaceholder = document.getElementById('ruleDefinitionPlaceholder');
+    ruleDefinitionPlaceholder.innerHTML = '';
+
+    const rulePreset = window.data.RULEPRESETDEFS.game[rulePresetSelect.value - 1];
+
+    // Note: No difference between Game and Tag Rule Presets as of yet
+
+    // Must Include / Exclude
+    if(rulePresetSelect.value === '1' ||
+        rulePresetSelect.value === '2') {
+
+        const ruleDefinitionLabel = document.createElement('input');
+        ruleDefinitionLabel.classList.add('button-disabled');
+        ruleDefinitionLabel.textContent = "";
+
+        ruleDefinitionPlaceholder.appendChild(ruleDefinitionLabel);
+        enableAddRuleButton();
+    }
+
+    // Max / Min
+    else if (rulePresetSelect.value === '3' ||
+        rulePresetSelect.value === '4') {
+
+        // Create the input group
+        const ruleDefinitionGroup = document.createElement('div');
+        ruleDefinitionGroup.classList.add('input-group');
+
+        // Create the label
+        const ruleDefinitionLabel = document.createElement('span');
+        ruleDefinitionLabel.textContent = rulePreset.fields[0].label + ':';
+
+        // Create the number input
+        const ruleDefinitionInput = document.createElement('input');
+        ruleDefinitionInput.type = 'number';
+        ruleDefinitionInput.value = rulePreset.fields[0].defaultValue;
+        ruleDefinitionInput.min = rulePreset.fields[0].min;
+        ruleDefinitionInput.step = rulePreset.fields[0].step;
+        ruleDefinitionInput.id = 'ruleDefinition-' + rulePreset.fields[0].key;
+
+        ruleDefinitionInput.addEventListener('input', () => {
+            checkForValidRule();
+        });
+
+        // Assemble the group
+        ruleDefinitionGroup.appendChild(ruleDefinitionLabel);
+        ruleDefinitionGroup.appendChild(ruleDefinitionInput);
+
+        ruleDefinitionPlaceholder.appendChild(ruleDefinitionGroup);
+
+        enableAddRuleButton();
+    }
+    
+    // Between
+    else if (rulePresetSelect.value === '5') {
+
+        rulePreset.fields.forEach(field => {
+            // Create the input group
+            const ruleDefinitionGroup = document.createElement('div');
+            ruleDefinitionGroup.classList.add('input-group');
+
+            // Create the label
+            const ruleDefinitionLabel = document.createElement('span');
+            ruleDefinitionLabel.textContent = field.label + ':';
+
+            // Create the number input
+            const ruleDefinitionInput = document.createElement('input');
+            ruleDefinitionInput.type = 'number';
+            ruleDefinitionInput.value = field.defaultValue;
+            ruleDefinitionInput.min = field.min;
+            ruleDefinitionInput.step = field.step;
+            ruleDefinitionInput.id = `ruleDefinition-${field.key}`;
+
+            // Assemble the group
+            ruleDefinitionGroup.appendChild(ruleDefinitionLabel);
+            ruleDefinitionGroup.appendChild(ruleDefinitionInput);
+
+            ruleDefinitionPlaceholder.appendChild(ruleDefinitionGroup);
+        });
+
+        const minInput = document.getElementById('ruleDefinition-min');
+        const maxInput = document.getElementById('ruleDefinition-max');
+
+        function checkMinMax() {
+            if (Number(maxInput.value) <= Number(minInput.value)) {
+                addRuleButtonWarningLabel.textContent = "Max must be greater than Min";
+                disableAddRuleButton();
+            }
+            else {
+                checkForValidRule();
+            }
+        }
+
+        minInput.addEventListener('input', checkMinMax);
+        maxInput.addEventListener('input', checkMinMax);
+
+        enableAddRuleButton();
+    }
+}
+
+function checkForValidRule() {
+    const targetType = ruleAppliesToSelect.value;
+    const targetId = Number(chooseAGameOrTagSelect.value);
+    const rulePresetId = Number(rulePresetSelect.value);
+
+    const values = [];
+
+    if (rulePresetId === 3 || rulePresetId === 4) {
+        values.push(Number(document.getElementById('ruleDefinition-limit').value));
+    }
+    else if (rulePresetId === 5) {
+        values.push(
+            Number(document.getElementById('ruleDefinition-min').value),
+            Number(document.getElementById('ruleDefinition-max').value)
+        );
+    }
+
+    const duplicateRuleFound = window.data.rules.some(rule =>
+        rule.targetType === targetType &&
+        rule.targetId === targetId &&
+        rule.rulePresetDefId === rulePresetId &&
+        JSON.stringify(rule.values) === JSON.stringify(values)
+    );
+
+    if (duplicateRuleFound) {
+        addRuleButtonWarningLabel.textContent = "This rule already exists";
+        disableAddRuleButton();
+    }
+    else {
+        addRuleButtonWarningLabel.textContent = "";
+        enableAddRuleButton();
+    }
+}
+
+function updateCurrentRulesList() {
+    const currentRulesList = document.getElementById('currentRulesList');
+
+    // Clear existing contents
+    currentRulesList.innerHTML = '';
+
+    // Get search input and selected filter
+    const rulesSearchInput = document.getElementById('rulesSearchInput').value.trim().toLowerCase();
+    const rulesSearchSelect = document.getElementById('rulesSearchSelect').value;
+
+    var filteredRules;
+    if(rulesSearchInput === '') {
+        filteredRules = window.data.rules;
+    }
+    else {
+        // Filter rules based on search input and selected filter
+        filteredRules = window.data.rules.filter(rule => {
+
+            // Skip rules that don't match the selected target type
+            if (rule.targetType !== rulesSearchSelect) {
+                return false;
+            }
+
+            // Find the target (game or tag)
+            const targetList = rule.targetType === 'games'
+                ? window.data.games
+                : window.data.tags;
+
+            const target = targetList.find(item => item.id === rule.targetId);
+
+            // Find the preset definition
+            const presetType = rule.targetType === 'games' ? 'game' : 'tag';
+
+            const preset = window.data.RULEPRESETDEFS[presetType].find(preset =>
+                preset.id === rule.rulePresetDefId
+            );
+
+            if (!target || !preset) return false;
+
+            return (
+                target.name.toLowerCase().includes(rulesSearchInput) ||
+                preset.name.toLowerCase().includes(rulesSearchInput)
+            );
+        });
+    }
+    // Create an element for each matching rule
+    filteredRules.forEach(rule => {
+
+        // Find the target (game or tag)
+        const targetList = rule.targetType === 'games'
+            ? window.data.games
+            : window.data.tags;
+
+        const target = targetList.find(item => item.id === rule.targetId);
+
+        // Find the preset definition
+        const presetType = rule.targetType === 'games' ? 'game' : 'tag';
+
+        const preset = window.data.RULEPRESETDEFS[presetType].find(preset =>
+            preset.id === rule.rulePresetDefId
+        );
+
+        if (!target || !preset) return;
+
+        const ruleElement = document.createElement('div');
+        ruleElement.className = 'card';
+        ruleElement.style.display = 'flex';
+        ruleElement.style.alignItems = 'center';
+        ruleElement.style.gap = '12px';
+
+        // SECTION 1: Rule Information
+        const ruleTextGroup = document.createElement('div');
+        ruleTextGroup.style.display = 'flex';
+        ruleTextGroup.style.flexDirection = 'column';
+        ruleTextGroup.style.flexShrink = '0';
+
+        // Display target name
+        const ruleTargetName = document.createElement('div');
+        ruleTargetName.textContent = presetType.charAt(0).toUpperCase() + presetType.slice(1) + ": " + target.name;
+        ruleTargetName.className = 'text';
+        ruleTextGroup.appendChild(ruleTargetName);
+        ruleTargetName.style.fontSize = '20px';
+
+        // Display preset name
+        const rulePresetName = document.createElement('div');
+        rulePresetName.textContent = preset.name;
+        rulePresetName.className = 'text-muted';
+        rulePresetName.style.fontSize = '12px';
+        ruleTextGroup.appendChild(rulePresetName);
+
+        ruleElement.appendChild(ruleTextGroup);
+
+        // SECTION 2: Rule Values
+        const ruleValuesGroup = document.createElement('div');
+        ruleValuesGroup.style.display = 'flex';
+        ruleValuesGroup.style.alignItems = 'center';
+        ruleValuesGroup.style.gap = '8px';
+        ruleValuesGroup.style.flex = '1';
+        ruleValuesGroup.style.minWidth = '0';
+        ruleValuesGroup.style.overflowX = 'auto';
+
+        // Match each stored value with its preset field definition
+        preset.fields.forEach((field, index) => {
+
+            const valueButton = document.createElement('button');
+            valueButton.type = 'button';
+            valueButton.textContent = `${field.label}: ${rule.values[index]}`;
+
+            // Display only
+            valueButton.style.flexShrink = '0';
+            valueButton.style.cursor = 'default';
+            valueButton.disabled = true;
+
+            ruleValuesGroup.appendChild(valueButton);
+        });
+
+        ruleElement.appendChild(ruleValuesGroup);
+
+        // SECTION 3: Action Buttons
+        const ruleActionsGroup = document.createElement('div');
+        ruleActionsGroup.style.display = 'flex';
+        ruleActionsGroup.style.alignItems = 'center';
+        ruleActionsGroup.style.flexShrink = '0';
+
+        // Delete Button
+        const ruleDelete = document.createElement('button');
+        ruleDelete.className = 'button-remove';
+        ruleDelete.textContent = 'Delete';
+        ruleDelete.type = 'button';
+
+        ruleDelete.addEventListener('click', () => {
+            window.data.deleteRule(rule.id);
+            checkForValidRule();
+            updateCurrentRulesList();
+        });
+
+        ruleActionsGroup.appendChild(ruleDelete);
+        ruleElement.appendChild(ruleActionsGroup);
+
+        currentRulesList.appendChild(ruleElement);
+    });
+
+    currentRulesLabel.textContent = "Current Rules (" + window.data.rules.length + ")"
+}
+
+updateChooseAGameOrTagSelect();
+updateRulePresetSelect();
+updateRuleDefinitionSelect();
+checkForValidRule();
+updateCurrentRulesList();
+
+    </script>
+
+</body>
