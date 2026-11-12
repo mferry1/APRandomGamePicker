@@ -49,17 +49,19 @@ This app is still in development. I'll be making tweaks to the UI here and there
 I don't know how possible some of these are from just an html app, but here's hoping
 - Base weighted probability for games
 - Additional Weighted probability for games based on the number of times it's been played relative to other games
-- A way to sort your yamls for each game
-- A page to quick select your yamls for your picked games and dump them into the Archipelago folder for generation
-- A way to generate the AP world and copy it wherever
 - A page to make notes for each game you play, such as reminders for what puts certain checks in logic, reference pictures, and hyperlinks to guides
-- Launch the AP world locally from the app
 - A way to make pages to help starting up each game easier. Make custom commands for each game that do some kind of function
   - Hyperlinks to browser games or external websites
   - Open a patch file from the generated AP world folder
   - Open an AP client with command args to automatically connect
   - Launch the associated steam game or exe
   - Open a games mod launcher with command args
-- Tie into other existing tools. Launch Axolotl, Sphere tracker, or other things
 - Hotkeys to quick swap focus between running exes on your computer
-   - Preset volume levels included
+     - Preset volume levels included
+
+- Tie into other existing tools. Launch Axolotl, Sphere tracker, or other things. There are existing tools that can do most of these other things witch is why the rest are down here
+  - A way to sort your yamls for each game
+  - A page to quick select your yamls for your picked games and dump them into the Archipelago folder for generation
+  - A way to generate the AP world and copy it wherever
+  - Launch the AP world locally from the app
+  
