@@ -59,7 +59,7 @@ I don't know how possible some of these are from just an html app, but here's ho
 - Hotkeys to quick swap focus between running exes on your computer
      - Preset volume levels included
 
-- Tie into other existing tools. Launch Axolotl, Sphere tracker, or other things. There are existing tools that can do most of these other things witch is why the rest are down here
+- Tie into other existing tools. Launch Axolotl, Sphere tracker, or other things. There are existing tools that can do most of these other things which is why the rest are down here
   - A way to sort your yamls for each game
   - A page to quick select your yamls for your picked games and dump them into the Archipelago folder for generation
   - A way to generate the AP world and copy it wherever
