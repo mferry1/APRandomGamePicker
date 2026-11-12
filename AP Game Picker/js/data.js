@@ -320,6 +320,8 @@ window.data = (() => {
             window.data.games.splice(gameIndex, 1);
         }
 
+        deleteActiveGame(id);
+
         saveData();
         return true;
     }
@@ -378,6 +380,7 @@ window.data = (() => {
         if (ruleIndex === -1) return false;
 
         rules.splice(ruleIndex, 1);
+        deleteActiveRule(id);
         saveData();
 
         return true;
@@ -397,16 +400,16 @@ window.data = (() => {
 
     /**
      * @param {number} ruleId
-     * @returns {number[]}
+     * @returns {boolean}
      */
     function deleteActiveRule(ruleId) {
         const index = activeRules.indexOf(ruleId);
 
-        if (index === -1) return activeRules;
+        if (index === -1) return false;
 
         activeRules.splice(index, 1);
         saveData();
-        return activeRules;
+        return true;
     }
 
     /**
@@ -423,16 +426,16 @@ window.data = (() => {
 
     /**
      * @param {number} gameId
-     * @returns {number[]}
+     * @returns {boolean}
      */
     function deleteActiveGame(gameId) {
         const index = activeGames.indexOf(gameId);
 
-        if (index === -1) return activeGames;
+        if (index === -1) return false;
 
         activeGames.splice(index, 1);
         saveData();
-        return activeGames;
+        return true;
     }
 
     /**
@@ -446,6 +449,9 @@ window.data = (() => {
         return true;
     }
 
+    /**
+     * @returns {boolean}
+     */
     function deletePickedGames() {
         pickedGames.length = 0;
         saveData();
