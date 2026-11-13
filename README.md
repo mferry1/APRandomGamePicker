@@ -57,7 +57,7 @@ Slated for alpha version 0.2.0:
 - Tag editing
 - Saveable active Game and Rule presets
 
-
+### Future
 I don't know how possible some of these are from just an html app, but here's hoping
 
 - A page to make notes for each game you play, such as reminders for what puts certain checks in logic, reference pictures, and hyperlinks to guides
