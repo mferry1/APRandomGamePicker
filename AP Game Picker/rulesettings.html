@@ -19,7 +19,7 @@
 
     <main>
         <section class="card">
-            <h2>Add a New Rule</h2>
+            <h2 style="text-align: left; margin-left: 0; padding-left: 0;">Add a New Rule</h2>
             <p class="section-description">Choose what the rule applies to, select a game or tag, and pick a rule preset.</p>
 
             <form id="ruleForm">
@@ -402,9 +402,11 @@ function updateCurrentRulesList() {
 
         const ruleElement = document.createElement('div');
         ruleElement.className = 'card';
+        ruleElement.style.background = "var(--bg)";
         ruleElement.style.display = 'flex';
         ruleElement.style.alignItems = 'center';
         ruleElement.style.gap = '12px';
+        ruleElement.style.overflowY = "auto";
 
         // SECTION 1: Rule Information
         const ruleTextGroup = document.createElement('div');

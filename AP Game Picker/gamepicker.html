@@ -19,7 +19,7 @@
 
     <main>
         <section class="card">
-        <h2>Generation Options</h2>
+        <h2 style="text-align: left; margin-left: 0; padding-left: 0;">Generation Options</h2>
             <div>
                 <div>
                     <span class="field-label">Number of Games:</span>
@@ -77,7 +77,7 @@
 
             <div id="gameSelectionView">
                 <div class="section-heading">
-                    <h2>Game Selection</h2>
+                    <h2 style="text-align: left; margin-left: 0; padding-left: 0;">Game Selection</h2>
                 </div>
 
                 <p class="text-muted">
@@ -105,7 +105,7 @@
 
             <div id="ruleSelectionView" hidden>
                 <div class="section-heading">
-                    <h2>Rule Selection</h2>
+                    <h2 style="text-align: left; margin-left: 0; padding-left: 0;">Rule Selection</h2>
                 </div>
 
                 <p class="text-muted">
@@ -134,7 +134,7 @@
         </section>
 
         <section class="card">
-            <h2>Selection Summary</h2>
+            <h2 style="text-align: left; margin-left: 0; padding-left: 0;">Selection Summary</h2>
 
             <div class="card" style="background: var(--bg);">
                 <label id="activeGamesLabel" style="display: block;"></label>
@@ -161,7 +161,7 @@
             </div>
 
             <div class="card" id="pickedGamesView" hidden>
-                <h2>Your Picked Games!</h2>
+                <h2 style="text-align: left; margin-left: 0; padding-left: 0;">Your Picked Games!</h2>
 
                 <div id="pickedGamesList"></div>
             </div>
@@ -329,154 +329,6 @@ function disableGenerateGamesButton() {
 }
 
 // Generating UI elements
-function updateGamesTabGamesList() {
-    const gamesTabGamesList = document.getElementById('gamesTabGamesList');
-
-    // Clear existing contents
-    gamesTabGamesList.innerHTML = '';
-
-    // Get search input and selected filter
-    const searchInput = document.getElementById('gamesTabSearchInput').value.trim().toLowerCase();
-    const searchFilter = document.getElementById('gamesTabSearchFilter').value;
-
-    // Filter games based on search input
-    const filteredGames = window.data.games.filter(game => {
-
-        // Search by game name
-        if (searchFilter === 'games') {
-            return game.name.toLowerCase().includes(searchInput);
-        }
-
-        // Search by assigned tag name
-        if (searchFilter === 'tags') {
-            return window.data.tags.some(tag =>
-                tag.games.includes(game.id) &&
-                tag.name.toLowerCase().includes(searchInput)
-            );
-        }
-
-        return true;
-    });
-
-    // Create an element for each matching game
-    filteredGames.forEach(game => {
-
-        const gameElement = document.createElement('div');
-        gameElement.className = "card";
-        gameElement.style.display = "flex";
-        gameElement.style.alignItems = "center";
-        gameElement.style.gap = "12px";
-
-        // SECTION 1: Game Information
-        const gameTextGroup = document.createElement('div');
-        gameTextGroup.style.display = "flex";
-        gameTextGroup.style.flexDirection = "column";
-        gameTextGroup.style.flexShrink = "0";
-
-        // Display Name
-        const gameName = document.createElement('div');
-        gameName.textContent = game.name;
-        gameName.className = "text";
-        gameTextGroup.appendChild(gameName);
-
-        // Display "Has X tags"
-        const gameHasXTags = document.createElement('div');
-        gameHasXTags.textContent = "Has " + `${game.tags?.length || 0}` + " tag(s)";
-        gameHasXTags.style.fontSize = "12px";
-        gameHasXTags.className = "text-muted";
-        gameTextGroup.appendChild(gameHasXTags);
-
-        gameElement.appendChild(gameTextGroup);
-
-        // SECTION 2: Assigned Tags (Horizontally Scrollable)
-        const gameTagsGroup = document.createElement('div');
-        gameTagsGroup.style.display = "flex";
-        gameTagsGroup.style.alignItems = "center";
-        gameTagsGroup.style.gap = "8px";
-        gameTagsGroup.style.flex = "1";
-        gameTagsGroup.style.minWidth = "0";
-        gameTagsGroup.style.overflowX = "auto";
-        gameTagsGroup.style.whiteSpace = "nowrap";
-
-        // Find and display each tag assigned to this game
-        const assignedTags = window.data.tags.filter(tag =>
-            tag.games.includes(game.id)
-        );
-
-        assignedTags.forEach(tag => {
-            const tagButton = document.createElement('button');
-            tagButton.textContent = tag.name;
-            tagButton.type = "button";
-
-            // Optional: make these look like display-only tag buttons
-            tagButton.style.flexShrink = "0";
-            tagButton.style.cursor = "default";
-
-            gameTagsGroup.appendChild(tagButton);
-        });
-
-        gameElement.appendChild(gameTagsGroup);
-
-
-        // SECTION 3: Action Buttons
-        const gameActionsGroup = document.createElement('div');
-        gameActionsGroup.style.display = "flex";
-        gameActionsGroup.style.alignItems = "center";
-        gameActionsGroup.style.gap = "8px";
-        gameActionsGroup.style.flexShrink = "0";
-
-        // Update Button
-        const gameUpdate = document.createElement('button');
-        gameUpdate.textContent = 'Update';
-        gameUpdate.type = "button";
-
-        if (window.updateGameCurrentGameId == game.id) {
-            gameUpdate.classList.add('game-update-selected');
-        }
-
-        gameUpdate.addEventListener('click', () => {
-
-            window.updateGameCurrentGameId = game.id;
-            window.updateGameCurrentGameButton = gameUpdate;
-
-            document.querySelectorAll('.game-update-selected').forEach(button => {
-                button.classList.remove('game-update-selected');
-            });
-
-            gameUpdate.classList.add('game-update-selected');
-
-            hideAddGameView();
-            unselectAddGameButton();
-            showUpdateGameView();
-            selectUpdateGameButton();
-        });
-
-        gameActionsGroup.appendChild(gameUpdate);
-
-        // Delete Button
-        const gameDelete = document.createElement('button');
-        gameDelete.className = 'button-remove';
-        gameDelete.textContent = 'Delete';
-        gameDelete.type = "button";
-
-        gameDelete.addEventListener('click', () => {
-            window.data.deleteGame(game.id);
-
-            updateGamesTabGamesList();
-        });
-
-        gameActionsGroup.appendChild(gameDelete);
-
-        gameElement.appendChild(gameActionsGroup);
-
-        gamesTabGamesList.appendChild(gameElement);
-    });
-
-    // Update game count
-    document.getElementById('yourGamesLabel').textContent = "Your games: " + `(${window.data.games.length})`;
-    updateTotalGamesLabel();
-}
-
 function updateInactiveRulesList() {
     const inactiveRulesList = document.getElementById('ruleSelectionInactiveRules');
     inactiveRulesList.innerHTML = '';
@@ -509,6 +361,7 @@ function updateInactiveRulesList() {
         ruleElement.style.display = 'flex';
         ruleElement.style.alignItems = 'center';
         ruleElement.style.gap = '8px';
+        ruleElement.style.overflowY = "auto";
 
         // SECTION 1: Rule Information
         const ruleTextGroup = document.createElement('div');
@@ -538,9 +391,7 @@ function updateInactiveRulesList() {
         ruleValuesGroup.style.alignItems = 'center';
         ruleValuesGroup.style.gap = '8px';
         ruleValuesGroup.style.flex = '1';
-        ruleValuesGroup.style.minWidth = '0';
-        ruleValuesGroup.style.overflowX = 'auto';
-
+        
         // Match each stored value with its preset field definition
         preset.fields.forEach((field, index) => {
 
@@ -605,6 +456,7 @@ function updateActiveRulesList() {
         ruleElement.style.display = 'flex';
         ruleElement.style.alignItems = 'center';
         ruleElement.style.gap = '12px';
+        ruleElement.style.overflowY = "auto";
 
         // SECTION 1: Rule Information
         const ruleTextGroup = document.createElement('div');
@@ -634,8 +486,6 @@ function updateActiveRulesList() {
         ruleValuesGroup.style.alignItems = 'center';
         ruleValuesGroup.style.gap = '8px';
         ruleValuesGroup.style.flex = '1';
-        ruleValuesGroup.style.minWidth = '0';
-        ruleValuesGroup.style.overflowX = 'auto';
 
         // Match each stored value with its preset field definition
         preset.fields.forEach((field, index) => {
@@ -683,6 +533,7 @@ function updateInactiveGamesList() {
         gameElement.style.display = "flex";
         gameElement.style.alignItems = "center";
         gameElement.style.gap = "12px";
+        gameElement.style.overflowY = "auto";
 
         // SECTION 1: Game Information
         const gameTextGroup = document.createElement('div');
@@ -705,8 +556,6 @@ function updateInactiveGamesList() {
         gameTagsGroup.style.gap = "8px";
         gameTagsGroup.style.flex = "1";
         gameTagsGroup.style.minWidth = "0";
-        gameTagsGroup.style.overflowX = "auto";
-        gameTagsGroup.style.whiteSpace = "nowrap";
 
         // Find and display each tag assigned to this game
         const assignedTags = window.data.tags.filter(tag =>
@@ -757,6 +606,7 @@ function updateActiveGamesList() {
         gameElement.style.display = "flex";
         gameElement.style.alignItems = "center";
         gameElement.style.gap = "12px";
+        gameElement.style.overflowY = "auto";
 
         // SECTION 1: Game Information
         const gameTextGroup = document.createElement('div');
@@ -778,9 +628,6 @@ function updateActiveGamesList() {
         gameTagsGroup.style.alignItems = "center";
         gameTagsGroup.style.gap = "8px";
         gameTagsGroup.style.flex = "1";
-        gameTagsGroup.style.minWidth = "0";
-        gameTagsGroup.style.overflowX = "auto";
-        gameTagsGroup.style.whiteSpace = "nowrap";
 
         // Find and display each tag assigned to this game
         const assignedTags = window.data.tags.filter(tag =>

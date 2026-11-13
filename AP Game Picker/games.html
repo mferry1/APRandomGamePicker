@@ -58,7 +58,7 @@
                     <div class="toolbar">
                         <label>Game name:
                             <div>
-                                <input id="addGameNameInput" maxlength="150" placeholder="e.g. Super Metroid">
+                                <input id="addGameNameInput" maxlength="30" placeholder="e.g. Super Metroid">
                                 <label id="addGameNameInputWarningLabel" style="color:#ff929a;"></label>
                             </div>
                         </label>
@@ -68,7 +68,7 @@
                         </label>
                     </div>
 
-                    <div class="card">
+                    <div class="card" style="background:var(--bg)">
                         <label>Tags:</label>
 	                    <div id="addGameTagCheckboxList"></div>
                     </div>
@@ -77,7 +77,7 @@
                         <label>Create a new tag:</label>
                         <div class="toolbar create-tag-toolbar">
                             <div>
-                                <input id="addGameCreateTagInput" maxlength="50" placeholder="e.g. Big, Dolphin, CPU intensive">
+                                <input id="addGameCreateTagInput" maxlength="30" placeholder="e.g. Big, Dolphin, CPU intensive">
                                 <label id="addGameCreateTagInputWarningLabel" style="color:#ff929a;"></label>
                             </div>
                             <div>
@@ -109,7 +109,7 @@
                         <div class="toolbar">
                             <label>Game name:
                                 <div>
-                                    <input id="updateGameNameInput" maxlength="150" placeholder="e.g. Super Metroid">
+                                    <input id="updateGameNameInput" maxlength="30" placeholder="e.g. Super Metroid">
                                     <label id="updateGameNameInputWarningLabel" style="color:#ff929a;"></label>
                                 </div>
                             </label>
@@ -119,7 +119,7 @@
                             </label>
                         </div>
 
-                        <div class="card">
+                        <div class="card" style="background:var(--bg)">
                             <label>Tags:</label>
                             <div id="updateGameTagCheckboxList"></div>
                         </div>
@@ -128,7 +128,7 @@
                             <label>Create a new tag:</label>
                             <div class="toolbar create-tag-toolbar">
                                 <div>
-                                    <input id="updateGameCreateTagInput" maxlength="50" placeholder="e.g. Big, Dolphin, CPU intensive">
+                                    <input id="updateGameCreateTagInput" maxlength="30" placeholder="e.g. Big, Dolphin, CPU intensive">
                                     <label id="updateGameCreateTagInputWarningLabel" style="color:#ff929a;"></label>
                                 </div>
                                 <div>
@@ -170,7 +170,7 @@
 
                 <div class="toolbar">
                     <div>
-                        <input id="tagTabAddTabInput" maxlength="50" placeholder="New tag name" aria-label="New tag name">
+                        <input id="tagTabAddTagInput" maxlength="30" placeholder="New tag name" aria-label="New tag name">
                         <label id="tagTabAddTagInputWarningLabel" style="color:#ff929a;"></label>
                     </div>
                     <button type="button" class="button-disabled" id="tagTabAddTagButton" aria-selected="false">＋ Add Tag</button>
@@ -182,7 +182,7 @@
                     </strong>
                         
                     <p class="text-muted" style="margin:4px 0">Choose any games that should receive this tag when you add it.</p>
-                    <div id="tagTabGamesChecboxList" class="card"></div>
+                    <div id="tagTabGamesChecboxList" class="card" style="background:var(--bg)"></div>
                 </div>
             </section>
     
@@ -245,7 +245,7 @@ const gamesTabView = document.getElementById('gamesTabView');
 
 // Tags Tab Views
 const tagsTabView = document.getElementById('tagsTabView');
-const tagTabAddTabInput = document.getElementById('tagTabAddTabInput');
+const tagTabAddTagInput = document.getElementById('tagTabAddTagInput');
 const tagTabAddTagButton = document.getElementById('tagTabAddTagButton');
 
 // Games List
@@ -276,7 +276,7 @@ tagsTabButton.addEventListener('click', () => {
     tagsTabButton.setAttribute('aria-selected', 'true');
     gamesTabButton.setAttribute('aria-selected', 'false');
 
-    tagTabAddTabInput.value = '';
+    tagTabAddTagInput.value = '';
     updateTagTabAddTagElements();
     updateTagTabGamesChecboxList();
     updateTagsTabTagsList();
@@ -394,7 +394,7 @@ addGameSaveGameButton.addEventListener('click', () => {
     gameName = addGameNameInput.value.trim();
     timesPlayed = addGameTimesPlayedInput.value;
     tagIds = Array.from(
-        document.querySelectorAll('input[name="gameTags"]:checked')
+        document.querySelectorAll('#addGameTagCheckboxList input[name="gameTags"]:checked')
     ).map(checkbox => Number(checkbox.value));
 
     createGame(gameName, timesPlayed, tagIds);
@@ -480,7 +480,7 @@ updateGameUpdateGameButton.addEventListener('click', () => {
     gameName = updateGameNameInput.value.trim();
     timesPlayed = updateGameTimesPlayedInput.value;
     tagIds = Array.from(
-        document.querySelectorAll('input[name="gameTags"]:checked')
+        document.querySelectorAll('#updateGameTagCheckboxList input[name="gameTags"]:checked')
     ).map(checkbox => Number(checkbox.value));
 
     window.data.updateGame(window.updateGameCurrentGameId, gameName, timesPlayed, tagIds);
@@ -515,7 +515,7 @@ updateGameClearButton.addEventListener('click', () => {
     updateUpdateGameClearButton();
 });
 
-tagTabAddTabInput.addEventListener('input', () => {
+tagTabAddTagInput.addEventListener('input', () => {
     updateTagTabAddTagElements();
 });
 
@@ -524,9 +524,9 @@ tagTabAddTagButton.addEventListener('click', () => {
         document.querySelectorAll('#tagTabGamesChecboxList input[name="tagGames"]:checked')
     ).map(checkbox => Number(checkbox.value));
 
-    window.data.createTag(tagTabAddTabInput.value, games);
+    window.data.createTag(tagTabAddTagInput.value, games);
     
-    tagTabAddTabInput.value = '';
+    tagTabAddTagInput.value = '';
     updateTagTabAddTagElements();
     updateTagTabGamesChecboxList();
     updateTagsTabTagsList();
@@ -650,6 +650,7 @@ function updateAddGamesTabTagCheckboxes() {
         tagCheckboxListItemCheckbox.value = tag.id;
         tagCheckboxListItemCheckbox.name = 'gameTags';
         tagCheckboxListItemCheckbox.id = `tag-${tag.id}`;
+        tagCheckboxListItemCheckbox.style.flex = "1";
 
         tagCheckboxListItemCheckbox.addEventListener('change', () => {
             updateAddGameClearButton();
@@ -734,6 +735,7 @@ function updateUpdateGamesTabTagCheckboxes() {
             tagCheckboxListItemCheckbox.value = tag.id;
             tagCheckboxListItemCheckbox.name = 'gameTags';
             tagCheckboxListItemCheckbox.id = `tag-${tag.id}`;
+            tagCheckboxListItemCheckbox.style.flex = "1";
 
             const game = window.data.games.find(game => game.id === window.updateGameCurrentGameId);
             if(game?.tags)
@@ -864,7 +866,16 @@ function updateGamesTabGamesList() {
         gameElement.className = "card";
         gameElement.style.display = "flex";
         gameElement.style.alignItems = "center";
-        gameElement.style.gap = "12px";
+        gameElement.style.gap = "16px";
+        gameElement.style.height = "86px";
+        gameElement.style.background = "var(--bg)";
+        
+        const gameSection1And2Group = document.createElement('div');
+        gameSection1And2Group.style.display = "flex";
+        gameSection1And2Group.style.gap = "12px";
+        gameSection1And2Group.style.alignItems = "center";
+        gameSection1And2Group.style.height = "80px";
+        gameSection1And2Group.style.overflowY = "auto";
 
         // SECTION 1: Game Information
         const gameTextGroup = document.createElement('div');
@@ -885,16 +896,15 @@ function updateGamesTabGamesList() {
         gameHasXTags.className = "text-muted";
         gameTextGroup.appendChild(gameHasXTags);
 
-        gameElement.appendChild(gameTextGroup);
+        gameSection1And2Group.appendChild(gameTextGroup);
 
         // SECTION 2: Assigned Tags (Horizontally Scrollable)
         const gameTagsGroup = document.createElement('div');
         gameTagsGroup.style.display = "flex";
         gameTagsGroup.style.alignItems = "center";
         gameTagsGroup.style.gap = "8px";
-        gameTagsGroup.style.flex = "1";
-        gameTagsGroup.style.minWidth = "0";
-        gameTagsGroup.style.overflowX = "auto";
+        gameTagsGroup.style.flex = "1 1 0";
+        gameTagsGroup.style.minWidth = "30";
         gameTagsGroup.style.whiteSpace = "nowrap";
 
         // Find and display each tag assigned to this game
@@ -914,8 +924,9 @@ function updateGamesTabGamesList() {
             gameTagsGroup.appendChild(tagButton);
         });
 
-        gameElement.appendChild(gameTagsGroup);
+        gameSection1And2Group.appendChild(gameTagsGroup);
 
+        gameElement.appendChild(gameSection1And2Group);
 
         // SECTION 3: Action Buttons
         const gameActionsGroup = document.createElement('div');
@@ -923,6 +934,7 @@ function updateGamesTabGamesList() {
         gameActionsGroup.style.alignItems = "center";
         gameActionsGroup.style.gap = "8px";
         gameActionsGroup.style.flexShrink = "0";
+        gameActionsGroup.style.marginLeft = "auto";
 
         // Update Button
         const gameUpdate = document.createElement('button');
@@ -1024,6 +1036,9 @@ function updateTagsTabTagsList() {
         tagElement.className = "card";
         tagElement.style.display = "flex";
         tagElement.style.alignItems = "center";
+        tagElement.style.background = "var(--bg)";
+        tagElement.style.overflowY = "auto";
+        tagElement.style.scrollbarGutter = "stable";
 
         const tagTextGroup = document.createElement('div');
         tagTextGroup.style.display = "flex";
@@ -1043,27 +1058,37 @@ function updateTagsTabTagsList() {
         
         tagElement.appendChild(tagTextGroup);
         
+        // Action Buttons
+        const tagActionsGroup = document.createElement('div');
+        tagActionsGroup.style.display = "flex";
+        tagActionsGroup.style.alignItems = "center";
+        tagActionsGroup.style.gap = "8px";
+        tagActionsGroup.style.flexShrink = "0";
+        tagActionsGroup.style.marginLeft = "auto";
+
         // Unassign Button
         const tagUnassign = document.createElement('button');
         tagUnassign.className = 'button-remove';
         tagUnassign.textContent = "Unassign";
-        tagUnassign.style.marginLeft = "auto";
+        tagUnassign.type = "button";
         tagUnassign.addEventListener('click', () => {
             tagTabTagUnassignButtonClicked(tag.id);
         });
 
-        tagElement.appendChild(tagUnassign);
+        tagActionsGroup.appendChild(tagUnassign);
 
         // Delete Button
         const tagDelete = document.createElement('button');
         tagDelete.className = 'button-remove';
         tagDelete.textContent = 'Delete';
-        tagDelete.style.marginLeft = "8px";
+        tagDelete.type = "button";
         tagDelete.addEventListener('click', () => {
             tagTabTagDeleteButtonClicked(tag.id);
         });
 
-        tagElement.appendChild(tagDelete);
+        tagActionsGroup.appendChild(tagDelete);
+
+        tagElement.appendChild(tagActionsGroup);
 
         tagList.appendChild(tagElement);
     });
@@ -1083,7 +1108,7 @@ function disableTagTabAddTagButton() {
 }
 
 function updateTagTabAddTagElements() {
-    const newName = tagTabAddTabInput.value.trim();
+    const newName = tagTabAddTagInput.value.trim();
     const alreadyExists = window.data.tags.some(tag => tag.name === newName);
 
     if(alreadyExists) {
