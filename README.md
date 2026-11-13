@@ -50,9 +50,16 @@ Notice that you can update how many times you've played a game in AP!
 
 This app is still in development. I'll be making tweaks to the UI here and there as feedback rolls in. Please report any bugs you find!
 
-I don't know how possible some of these are from just an html app, but here's hoping
+Slated for alpha version 0.2.0:
 - Base weighted probability for games
 - Additional Weighted probability for games based on the number of times it's been played relative to other games
+- Collapsible views for when your lists start getting long
+- Tag editing
+- Saveable active Game and Rule presets
+
+
+I don't know how possible some of these are from just an html app, but here's hoping
+
 - A page to make notes for each game you play, such as reminders for what puts certain checks in logic, reference pictures, and hyperlinks to guides
 - A way to make pages to help starting up each game easier. Make custom commands for each game that do some kind of function
   - Hyperlinks to browser games or external websites
