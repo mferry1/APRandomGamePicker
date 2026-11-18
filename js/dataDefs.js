@@ -1,1 +1,0 @@
-const { tags, games, rules, RULEPRESETDEFS, activeRules, activeGames, pickedGames, createTag, updateTag, deleteTag, createGame, updateGame, deleteGame, createRule, updateRule, deleteRule, addActiveRule, deleteActiveRule, updatePickedGames,  deletePickedGames } = window.data;
