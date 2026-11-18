@@ -1,0 +1,977 @@
+    
+window.updateGameCurrentGameId = null;
+window.updateGameCurrentGameButton = null;
+
+const totalGamesLabel = document.getElementById('totalGamesLabel');
+const totalTagsLabel = document.getElementById('totalTagsLabel');
+
+const gamesTabButton = document.getElementById('gamesTabButton');
+const tagsTabButton = document.getElementById('tagsTabButton');
+
+const addGameButton = document.getElementById('addGameButton');
+const updateGameButton = document.getElementById('updateGameButton');
+
+// Add Game View Elements
+const addGameNameInput = document.getElementById('addGameNameInput');
+const addGameTimesPlayedInput = document.getElementById('addGameTimesPlayedInput');
+const addGameCreateTagInput = document.getElementById('addGameCreateTagInput');
+const addGameCreateTagInputWarningLabel = document.getElementById('addGameCreateTagInputWarningLabel');
+const addGameCreateTagButton = document.getElementById('addGameCreateTagButton');
+const addGameSaveGameButton = document.getElementById('addGameSaveGameButton');
+const addGameClearButton = document.getElementById('addGameClearButton');
+
+// Update Game View Elements
+const updateGameViewNoGameSelectedLabel = document.getElementById('updateGameViewNoGameSelectedLabel');
+const updateGameViewForm = document.getElementById('updateGameViewForm');
+const updateGameNameInput = document.getElementById('updateGameNameInput');
+const updateGameTimesPlayedInput = document.getElementById('updateGameTimesPlayedInput');
+const updateGameCreateTagInput = document.getElementById('updateGameCreateTagInput');
+const updateGameCreateTagInputWarningLabel = document.getElementById('updateGameCreateTagInputWarningLabel');
+const updateGameCreateTagButton = document.getElementById('updateGameCreateTagButton');
+const updateGameUpdateGameButton = document.getElementById('updateGameUpdateGameButton');
+const updateGameClearButton = document.getElementById('updateGameClearButton');
+
+// Games Tab Views
+const addGameView = document.getElementById('addGameView');
+const updateGameView = document.getElementById('updateGameView');
+const gamesTabView = document.getElementById('gamesTabView');
+
+// Tags Tab Views
+const tagsTabView = document.getElementById('tagsTabView');
+const tagTabAddTagInput = document.getElementById('tagTabAddTagInput');
+const tagTabAddTagButton = document.getElementById('tagTabAddTagButton');
+
+// Games List
+const gamesTabSearchInput = document.getElementById('gamesTabSearchInput');
+const gamesTabSearchFilter = document.getElementById('gamesTabSearchFilter');
+
+gamesTabButton.addEventListener('click', () => {
+    gamesTabView.style.display = 'block';
+    tagsTabView.style.display = 'none';
+
+    gamesTabButton.classList.add('active');
+    tagsTabButton.classList.remove('active');
+
+    gamesTabButton.setAttribute('aria-selected', 'true');
+    tagsTabButton.setAttribute('aria-selected', 'false');
+
+    addGameCreateTagInput.dispatchEvent(new Event('input'));
+    updateGameCreateTagInput.dispatchEvent(new Event('input'));
+});
+
+tagsTabButton.addEventListener('click', () => {
+    gamesTabView.style.display = 'none';
+    tagsTabView.style.display = 'block';
+
+    tagsTabButton.classList.add('active');
+    gamesTabButton.classList.remove('active');
+
+    tagsTabButton.setAttribute('aria-selected', 'true');
+    gamesTabButton.setAttribute('aria-selected', 'false');
+
+    tagTabAddTagInput.value = '';
+    updateTagTabAddTagElements();
+    updateTagTabGamesChecboxList();
+    updateTagsTabTagsList();
+});
+
+addGameButton.addEventListener('click', () => {
+    if(addGameButton.getAttribute('aria-selected') === 'true') {
+        hideAddGameView();
+        unselectAddGameButton();
+    }
+    else {
+        unselectUpdateGameButton();
+        hideUpdateGameView();
+
+        if(window.updateGameCurrentGameButton) {
+            window.updateGameCurrentGameButton.classList.remove('game-update-selected');
+            window.updateGameCurrentGameButton = null;
+            window.updateGameCurrentGameId = null;
+        }
+
+        selectAddGameButton();
+        showAddGameView();
+    }
+});
+
+updateGameButton.addEventListener('click', () => {
+    if(updateGameButton.getAttribute('aria-selected') === 'true') {
+        hideUpdateGameView();
+        unselectUpdateGameButton();
+    }
+    else {
+        unselectAddGameButton();
+        hideAddGameView();
+        showUpdateGameView();
+        selectUpdateGameButton();
+    }
+});
+
+addGameNameInput.addEventListener('input', () => {
+
+    const gameWithSameNameExists = window.data.games.some(game =>
+        game.name.toLowerCase() === addGameNameInput.value.trim()
+    )
+
+    if(gameWithSameNameExists) {
+        addGameNameInputWarningLabel.textContent = "A game with the name already exists";
+    }
+    else {
+        addGameNameInputWarningLabel.textContent = "";
+    }
+
+
+    if (addGameNameInput.value.trim() === '' || gameWithSameNameExists) {
+        if(addGameSaveGameButton.getAttribute('aria-selected') === 'true') {
+            addGameSaveGameButton.setAttribute('aria-selected', 'false');
+            addGameSaveGameButton.className = "button-disabled";
+        }
+
+        
+        updateAddGameClearButton();
+    }
+
+    else {
+        if(addGameSaveGameButton.getAttribute('aria-selected') === 'false') {
+            addGameSaveGameButton.setAttribute('aria-selected', 'true');
+            addGameSaveGameButton.className = "button-active";
+        }
+        updateAddGameClearButton();
+    }
+});
+
+addGameTimesPlayedInput.addEventListener('input', () => {
+    updateAddGameClearButton();
+});
+
+addGameCreateTagInput.addEventListener('input', () => {
+
+    const newName = addGameCreateTagInput.value.trim();
+    const alreadyExists = window.data.tags.some(tag => tag.name === newName);
+
+    if(alreadyExists) {
+        addGameCreateTagInputWarningLabel.textContent = "A tag with that name already exists!";
+    }
+    else {
+        addGameCreateTagInputWarningLabel.textContent = "";
+    }
+
+    if (newName === '' || alreadyExists) {
+        if(addGameCreateTagButton.getAttribute('aria-selected') === 'true') {
+            addGameCreateTagButton.setAttribute('aria-selected', 'false');
+            addGameCreateTagButton.className = "button-disabled";
+        }
+    }
+
+    else {
+        if(addGameCreateTagButton.getAttribute('aria-selected') === 'false') {
+            addGameCreateTagButton.setAttribute('aria-selected', 'true');
+            addGameCreateTagButton.className = "button-active";
+        }
+    }
+    
+    updateAddGameClearButton();
+});
+
+addGameCreateTagButton.addEventListener('click', () => {
+    createTag(addGameCreateTagInput.value.trim());
+    updateTotalTagsLabel();
+    updateAddGamesTabTagCheckboxes();
+    updateTagsTabTagsList();
+    addGameCreateTagInput.value="";
+    addGameCreateTagInput.dispatchEvent(new Event('input'));
+});
+
+addGameSaveGameButton.addEventListener('click', () => {
+    gameName = addGameNameInput.value.trim();
+    timesPlayed = addGameTimesPlayedInput.value;
+    tagIds = Array.from(
+        document.querySelectorAll('#addGameTagCheckboxList input[name="gameTags"]:checked')
+    ).map(checkbox => Number(checkbox.value));
+
+    createGame(gameName, timesPlayed, tagIds);
+    updateGamesTabGamesList();
+    addGameClearButtonClicked();
+});
+
+addGameClearButton.addEventListener('click', () => {
+    addGameClearButtonClicked();
+});
+
+updateGameNameInput.addEventListener('input', () => {
+    const gameWithSameNameExists = window.data.games.some(game =>
+        game.name.toLowerCase() === updateGameNameInput.value.trim())
+
+    const isNameSame = updateGameNameInput.value.trim() === (window.data.games.find(game => game.id === window.updateGameCurrentGameId).name);
+    
+    if(gameWithSameNameExists && !isNameSame) {
+        updateGameNameInputWarningLabel.textContent = "A game with the name already exists";
+    }
+    else {
+        updateGameNameInputWarningLabel.textContent = "";
+    }
+
+     if (updateGameNameInput.value.trim() === '' || gameWithSameNameExists) {
+        
+        if(updateGameUpdateGameButton.getAttribute('aria-selected') === 'true') {
+            disableUpdateGameUpdateGameButton();
+        }
+    }
+
+    else if(updateGameUpdateGameButton.getAttribute('aria-selected') === 'false') {
+            enableUpdateGameUpdateGameButton();
+    }
+
+    updateUpdateGameUpdateGameButton();
+    updateUpdateGameClearButton();
+});
+
+updateGameTimesPlayedInput.addEventListener('input', () => {
+    updateUpdateGameUpdateGameButton();
+    updateUpdateGameClearButton();
+});
+
+updateGameCreateTagInput.addEventListener('input', () => {
+    const newName = updateGameCreateTagInput.value.trim();
+    const alreadyExists = window.data.tags.some(tag => tag.name === newName);
+
+    if(alreadyExists) {
+        updateGameCreateTagInputWarningLabel.textContent = "A tag with that name already exists!";
+    }
+    else {
+        updateGameCreateTagInputWarningLabel.textContent = "";
+    }
+
+    if (newName === '' || alreadyExists) {
+        if(updateGameCreateTagButton.getAttribute('aria-selected') === 'true') {
+            updateGameCreateTagButton.setAttribute('aria-selected', 'false');
+            updateGameCreateTagButton.className = "button-disabled";
+        }
+    }
+
+    else {
+        if(updateGameCreateTagButton.getAttribute('aria-selected') === 'false') {
+            updateGameCreateTagButton.setAttribute('aria-selected', 'true');
+            updateGameCreateTagButton.className = "button-active";
+        }
+    }
+    
+    updateUpdateGameClearButton();
+});
+
+updateGameCreateTagButton.addEventListener('click', () => {
+    createTag(updateGameCreateTagInput.value.trim());
+    updateTotalTagsLabel();
+    updateUpdateGamesTabTagCheckboxes();
+    updateTagsTabTagsList();
+    updateGameCreateTagInput.value="";
+    updateGameCreateTagInput.dispatchEvent(new Event('input'));
+});
+
+updateGameUpdateGameButton.addEventListener('click', () => {
+    gameName = updateGameNameInput.value.trim();
+    timesPlayed = updateGameTimesPlayedInput.value;
+    tagIds = Array.from(
+        document.querySelectorAll('#updateGameTagCheckboxList input[name="gameTags"]:checked')
+    ).map(checkbox => Number(checkbox.value));
+
+    window.data.updateGame(window.updateGameCurrentGameId, gameName, timesPlayed, tagIds);
+    updateGamesTabGamesList();
+    updateUpdateGameView();
+    updateUpdateGameUpdateGameButton();
+    updateUpdateGameClearButton();
+});
+
+updateGameClearButton.addEventListener('click', () => {
+    updateGameNameInput.value = '';
+    updateGameNameInputWarningLabel.textContent = '';
+    updateGameTimesPlayedInput.value = 0;
+
+    const checkedTags = updateGameTagCheckboxList.querySelectorAll(
+        'input[name="gameTags"]:checked'
+    );
+
+    checkedTags.forEach(checkbox => {
+        checkbox.checked = false;
+    });
+
+    updateGameCreateTagInput.value = '';
+    updateGameCreateTagInputWarningLabel.textContent = '';
+
+    if(updateGameCreateTagButton.getAttribute('aria-selected') === 'true') {
+            updateGameCreateTagButton.setAttribute('aria-selected', 'false');
+            updateGameCreateTagButton.className = "button-disabled";
+        }
+
+    updateUpdateGameUpdateGameButton();
+    updateUpdateGameClearButton();
+});
+
+tagTabAddTagInput.addEventListener('input', () => {
+    updateTagTabAddTagElements();
+});
+
+tagTabAddTagButton.addEventListener('click', () => {
+    const games = Array.from(
+        document.querySelectorAll('#tagTabGamesChecboxList input[name="tagGames"]:checked')
+    ).map(checkbox => Number(checkbox.value));
+
+    window.data.createTag(tagTabAddTagInput.value, games);
+    
+    tagTabAddTagInput.value = '';
+    updateTagTabAddTagElements();
+    updateTagTabGamesChecboxList();
+    updateTagsTabTagsList();
+    updateTotalTagsLabel();
+    updateAddGamesTabTagCheckboxes();
+    updateUpdateGameView();
+});
+
+gamesTabSearchInput.addEventListener('input', () => {
+    updateGamesTabGamesList();
+});
+
+gamesTabSearchFilter.addEventListener('change', () => {
+    updateGamesTabGamesList();
+});
+
+function showAddGameView() {
+    addGameView.style.display = 'block';
+    addGameView.classList.add('active');
+}
+
+function hideAddGameView() {
+    addGameView.style.display = 'none';
+    addGameView.classList.remove('active');
+}
+
+function showUpdateGameView() {
+    updateGameView.style.display = 'block';
+    updateGameView.classList.add('active');
+
+    updateUpdateGameView();
+}
+
+function hideUpdateGameView() {
+    updateGameView.style.display = 'none';
+    updateGameView.classList.remove('active');
+}
+
+function selectAddGameButton() {
+    addGameButton.setAttribute('aria-selected', 'true');
+    addGameButton.className = "button-active";
+}
+
+function unselectAddGameButton() {
+    addGameButton.setAttribute('aria-selected', 'false');
+    addGameButton.className = "";
+}
+
+function selectUpdateGameButton() {
+    updateGameButton.setAttribute('aria-selected', 'true');
+    updateGameButton.className = "button-active";
+}
+
+function unselectUpdateGameButton() {
+    updateGameButton.setAttribute('aria-selected', 'false');
+    updateGameButton.className = "";
+}
+
+function enableUpdateGameUpdateGameButton() {
+    updateGameUpdateGameButton.setAttribute('aria-selected', 'true');
+    updateGameUpdateGameButton.className = "button-active";
+}
+
+function disableUpdateGameUpdateGameButton() {
+    updateGameUpdateGameButton.setAttribute('aria-selected', 'false');
+    updateGameUpdateGameButton.className = "button-disabled";
+}
+
+function enableAddGameSaveGameButton() {
+    addGameSaveGameButton.setAttribute('aria-selected', 'true');
+    addGameSaveGameButton.className = "button-active";
+}
+
+function disableAddGameSaveGameButton() {
+    addGameSaveGameButton.setAttribute('aria-selected', 'false');
+    addGameSaveGameButton.className = "button-disabled";
+}
+
+function updateTotalGamesLabel() {
+    totalGamesLabel.textContent = window.data.games.length;
+}
+
+function updateTotalTagsLabel() {
+    totalTagsLabel.textContent = window.data.tags.length;
+}
+
+function updateAddGameClearButton() {
+
+    // There is a clearable value somewhere
+    if (addGameNameInput.value !== '' ||
+        addGameTimesPlayedInput.value > 0 ||
+        addGameCreateTagInput.value !== '') {
+        if(addGameClearButton.getAttribute('aria-selected') === 'false') {
+            addGameClearButton.setAttribute('aria-selected', 'true');
+            addGameClearButton.className = "";
+        }
+    }
+
+    // No clearable values
+    else {
+        if (addGameClearButton.getAttribute('aria-selected') === 'true') {
+            addGameClearButton.setAttribute('aria-selected', 'false');
+            addGameClearButton.className = "button-disabled";
+        }
+    }
+}
+
+function updateAddGamesTabTagCheckboxes() {
+    const addGameTagCheckboxList = document.getElementById('addGameTagCheckboxList');
+
+    // Clear existing checkboxes
+    addGameTagCheckboxList.innerHTML = '';
+
+    // Create a checkbox for every existing tag
+    window.data.tags.forEach(tag => {
+        const tagCheckboxListItem = document.createElement('div');
+        tagCheckboxListItem.classList.add('checkbox-item');
+
+        const tagCheckboxListItemCheckbox = document.createElement('input');
+        tagCheckboxListItemCheckbox.type = 'checkbox';
+        tagCheckboxListItemCheckbox.value = tag.id;
+        tagCheckboxListItemCheckbox.name = 'gameTags';
+        tagCheckboxListItemCheckbox.id = `tag-${tag.id}`;
+        tagCheckboxListItemCheckbox.style.flex = "1";
+
+        tagCheckboxListItemCheckbox.addEventListener('change', () => {
+            updateAddGameClearButton();
+        });
+
+        const tagCheckboxListItemLabel = document.createElement('label');
+        tagCheckboxListItemLabel.textContent = tag.name;
+        tagCheckboxListItemLabel.htmlFor = `tag-${tag.id}`;
+
+        tagCheckboxListItem.appendChild(tagCheckboxListItemCheckbox);
+        tagCheckboxListItem.appendChild(tagCheckboxListItemLabel);
+
+        addGameTagCheckboxList.appendChild(tagCheckboxListItem);
+    });
+}
+
+function updateAddGameClearButton() {
+
+    const hasCheckedTags = addGameTagCheckboxList.querySelector(
+        'input[name="gameTags"]:checked'
+    ) !== null;
+
+    // There is a clearable value somewhere
+    if (addGameNameInput.value !== '' ||
+        addGameTimesPlayedInput.value > 0 ||
+        addGameCreateTagInput.value !== '' ||
+        hasCheckedTags) {
+        if(addGameClearButton.getAttribute('aria-selected') === 'false') {
+            addGameClearButton.setAttribute('aria-selected', 'true');
+            addGameClearButton.className = "";
+        }
+    }
+
+    // No clearable values
+    else {
+        if (addGameClearButton.getAttribute('aria-selected') === 'true') {
+            addGameClearButton.setAttribute('aria-selected', 'false');
+            addGameClearButton.className = "button-disabled";
+        }
+    }
+}
+
+function addGameClearButtonClicked() {
+    addGameNameInput.value = '';
+    addGameNameInputWarningLabel.textContent = "";
+    addGameTimesPlayedInput.value = 0;
+
+    const checkedTags = addGameTagCheckboxList.querySelectorAll(
+        'input[name="gameTags"]:checked'
+    );
+
+    checkedTags.forEach(checkbox => {
+        checkbox.checked = false;
+    });
+
+    addGameCreateTagInput.value = '';
+    addGameCreateTagInputWarningLabel.textContent = '';
+
+    if(addGameCreateTagButton.getAttribute('aria-selected') === 'true') {
+            addGameCreateTagButton.setAttribute('aria-selected', 'false');
+            addGameCreateTagButton.className = "button-disabled";
+        }
+
+    disableAddGameSaveGameButton();
+    updateAddGameClearButton();
+}
+
+function updateUpdateGamesTabTagCheckboxes() {
+    const updateGameTagCheckboxList = document.getElementById('updateGameTagCheckboxList');
+
+    // Clear existing checkboxes
+    updateGameTagCheckboxList.innerHTML = '';
+
+    // Create a checkbox for every existing tag
+    if(window.data.tags) {
+        window.data.tags.forEach(tag => {
+            const tagCheckboxListItem = document.createElement('div');
+            tagCheckboxListItem.classList.add('checkbox-item');
+
+            const tagCheckboxListItemCheckbox = document.createElement('input');
+            tagCheckboxListItemCheckbox.type = 'checkbox';
+            tagCheckboxListItemCheckbox.value = tag.id;
+            tagCheckboxListItemCheckbox.name = 'gameTags';
+            tagCheckboxListItemCheckbox.id = `tag-${tag.id}`;
+            tagCheckboxListItemCheckbox.style.flex = "1";
+
+            const game = window.data.games.find(game => game.id === window.updateGameCurrentGameId);
+            if(game?.tags)
+                tagCheckboxListItemCheckbox.checked = game.tags.includes(tag.id);
+
+            tagCheckboxListItemCheckbox.addEventListener('change', () => {
+                updateUpdateGameUpdateGameButton();
+                updateUpdateGameClearButton();
+            });
+
+            const tagCheckboxListItemLabel = document.createElement('label');
+            tagCheckboxListItemLabel.textContent = tag.name;
+            tagCheckboxListItemLabel.htmlFor = `tag-${tag.id}`;
+
+            tagCheckboxListItem.appendChild(tagCheckboxListItemCheckbox);
+            tagCheckboxListItem.appendChild(tagCheckboxListItemLabel);
+
+            updateGameTagCheckboxList.appendChild(tagCheckboxListItem);
+        });
+    }
+}
+
+function checkUpdateGameTagsChanged() {
+    const game = window.data.games.find(
+        game => game.id === window.updateGameCurrentGameId
+    );
+
+    if (!game) return;
+
+    // Get IDs of all currently checked checkboxes
+    const selectedTagIds = Array.from(
+        document.querySelectorAll('input[name="gameTags"]:checked')
+    ).map(checkbox => Number(checkbox.value));
+
+    // Compare current selections against the game's saved tags
+    const originalTagIds = game.tags || [];
+
+    const hasChanged =
+        selectedTagIds.length !== originalTagIds.length ||
+        selectedTagIds.some(id => !originalTagIds.includes(id));
+
+    // Check whether anything changed
+    if (hasChanged) {
+        return true;
+    }
+    else {
+        return false;
+    }
+}
+
+function updateUpdateGameUpdateGameButton() {
+
+    const isNameEmpty = updateGameNameInput.value.trim() === '';
+    const isNameSame = updateGameNameInput.value.trim() === (window.data.games.find(game => game.id === window.updateGameCurrentGameId).name);
+    const isTimesPlayedChanged = updateGameTimesPlayedInput.value !== window.data.games.find(game => game.id === window.updateGameCurrentGameId).timesPlayed;
+    const isTagsChanged = checkUpdateGameTagsChanged();
+
+    if(isNameEmpty) {
+        disableUpdateGameUpdateGameButton();
+        }
+    else if(!isNameSame || isTimesPlayedChanged || isTagsChanged) {
+        enableUpdateGameUpdateGameButton();
+        }
+    else {
+        disableUpdateGameUpdateGameButton();
+    }
+}
+
+function updateUpdateGameClearButton() {
+
+    const hasCheckedTags = updateGameTagCheckboxList.querySelector(
+        'input[name="gameTags"]:checked'
+    ) !== null;
+
+    // There is a clearable value somewhere
+    if (updateGameNameInput.value !== '' ||
+        updateGameTimesPlayedInput.value > 0 ||
+        updateGameCreateTagInput.value !== '' ||
+        hasCheckedTags) {
+        if(updateGameClearButton.getAttribute('aria-selected') === 'false') {
+            updateGameClearButton.setAttribute('aria-selected', 'true');
+            updateGameClearButton.className = "";
+        }
+    }
+
+    // No clearable values
+    else {
+        if (updateGameClearButton.getAttribute('aria-selected') === 'true') {
+            updateGameClearButton.setAttribute('aria-selected', 'false');
+            updateGameClearButton.className = "button-disabled";
+        }
+    }
+}
+
+function updateGamesTabGamesList() {
+    const gamesTabGamesList = document.getElementById('gamesTabGamesList');
+
+    // Clear existing contents
+    gamesTabGamesList.innerHTML = '';
+
+    // Get search input and selected filter
+    const searchInput = document.getElementById('gamesTabSearchInput').value.trim().toLowerCase();
+    const searchFilter = document.getElementById('gamesTabSearchFilter').value;
+
+    // Filter games based on search input
+    const filteredGames = window.data.games.filter(game => {
+
+        // Search by game name
+        if (searchFilter === 'games') {
+            return game.name.toLowerCase().includes(searchInput);
+        }
+
+        // Search by assigned tag name
+        if (searchFilter === 'tags') {
+            return window.data.tags.some(tag =>
+                tag.games.includes(game.id) &&
+                tag.name.toLowerCase().includes(searchInput)
+            );
+        }
+
+        return true;
+    });
+
+    // Create an element for each matching game
+    filteredGames.forEach(game => {
+
+        const gameElement = document.createElement('div');
+        gameElement.className = "card";
+        gameElement.style.display = "flex";
+        gameElement.style.alignItems = "center";
+        gameElement.style.gap = "16px";
+        gameElement.style.height = "86px";
+        gameElement.style.background = "var(--bg)";
+        
+        const gameSection1And2Group = document.createElement('div');
+        gameSection1And2Group.style.display = "flex";
+        gameSection1And2Group.style.gap = "12px";
+        gameSection1And2Group.style.alignItems = "center";
+        gameSection1And2Group.style.height = "80px";
+        gameSection1And2Group.style.overflowY = "auto";
+
+        // SECTION 1: Game Information
+        const gameTextGroup = document.createElement('div');
+        gameTextGroup.style.display = "flex";
+        gameTextGroup.style.flexDirection = "column";
+        gameTextGroup.style.flexShrink = "0";
+
+        // Display Name
+        const gameName = document.createElement('div');
+        gameName.textContent = game.name;
+        gameName.className = "text";
+        gameTextGroup.appendChild(gameName);
+
+        // Display "Has X tags"
+        const gameHasXTags = document.createElement('div');
+        gameHasXTags.textContent = "Has " + `${game.tags?.length || 0}` + " tag(s)";
+        gameHasXTags.style.fontSize = "12px";
+        gameHasXTags.className = "text-muted";
+        gameTextGroup.appendChild(gameHasXTags);
+
+        gameSection1And2Group.appendChild(gameTextGroup);
+
+        // SECTION 2: Assigned Tags (Horizontally Scrollable)
+        const gameTagsGroup = document.createElement('div');
+        gameTagsGroup.style.display = "flex";
+        gameTagsGroup.style.alignItems = "center";
+        gameTagsGroup.style.gap = "8px";
+        gameTagsGroup.style.flex = "1 1 0";
+        gameTagsGroup.style.minWidth = "30";
+        gameTagsGroup.style.whiteSpace = "nowrap";
+
+        // Find and display each tag assigned to this game
+        const assignedTags = window.data.tags.filter(tag =>
+            tag.games.includes(game.id)
+        );
+
+        assignedTags.forEach(tag => {
+            const tagButton = document.createElement('button');
+            tagButton.textContent = tag.name;
+            tagButton.type = "button";
+
+            // Optional: make these look like display-only tag buttons
+            tagButton.style.flexShrink = "0";
+            tagButton.style.cursor = "default";
+
+            gameTagsGroup.appendChild(tagButton);
+        });
+
+        gameSection1And2Group.appendChild(gameTagsGroup);
+
+        gameElement.appendChild(gameSection1And2Group);
+
+        // SECTION 3: Action Buttons
+        const gameActionsGroup = document.createElement('div');
+        gameActionsGroup.style.display = "flex";
+        gameActionsGroup.style.alignItems = "center";
+        gameActionsGroup.style.gap = "8px";
+        gameActionsGroup.style.flexShrink = "0";
+        gameActionsGroup.style.marginLeft = "auto";
+
+        // Update Button
+        const gameUpdate = document.createElement('button');
+        gameUpdate.textContent = 'Update';
+        gameUpdate.type = "button";
+
+        if (window.updateGameCurrentGameId == game.id) {
+            gameUpdate.classList.add('game-update-selected');
+        }
+
+        gameUpdate.addEventListener('click', () => {
+
+            window.updateGameCurrentGameId = game.id;
+            window.updateGameCurrentGameButton = gameUpdate;
+
+            document.querySelectorAll('.game-update-selected').forEach(button => {
+                button.classList.remove('game-update-selected');
+            });
+
+            gameUpdate.classList.add('game-update-selected');
+
+            hideAddGameView();
+            unselectAddGameButton();
+
+            showUpdateGameView();
+            selectUpdateGameButton();
+        });
+
+        gameActionsGroup.appendChild(gameUpdate);
+
+
+        // Delete Button
+        const gameDelete = document.createElement('button');
+        gameDelete.className = 'button-remove';
+        gameDelete.textContent = 'Delete';
+        gameDelete.type = "button";
+
+        gameDelete.addEventListener('click', () => {
+            window.data.deleteGame(game.id);
+
+            updateGamesTabGamesList();
+        });
+
+        gameActionsGroup.appendChild(gameDelete);
+
+        gameElement.appendChild(gameActionsGroup);
+
+        gamesTabGamesList.appendChild(gameElement);
+    });
+
+    // Update game count
+    document.getElementById('yourGamesLabel').textContent = "Your games: " + `(${window.data.games.length})`;
+    updateTotalGamesLabel();
+}
+
+function updateUpdateGameView() {
+    if(window.updateGameCurrentGameId == null) {
+        updateGameViewNoGameSelectedLabel.style.display = 'block';
+        updateGameViewForm.style.display = 'none';
+
+        if(window.data.games.length < 1) {
+            updateGameViewNoGameSelectedLabel.textContent = "Create a game before using this tab";
+        }
+        else {
+            updateGameViewNoGameSelectedLabel.textContent = "Select 'Update' from a game in the games list below";
+        }
+    } 
+
+    else {
+        updateGameViewNoGameSelectedLabel.style.display = 'none';
+        updateGameViewForm.style.display = 'block';
+
+        game = window.data.games.find(game => game.id === window.updateGameCurrentGameId);
+
+        updateGameViewFormHeaderLabel.textContent = 'Update: ' + game.name;
+        updateGameNameInput.value = game.name;
+        updateGameNameInputWarningLabel.textContent = '';
+        updateGameTimesPlayedInput.value = game.timesPlayed;
+
+        updateUpdateGamesTabTagCheckboxes();
+
+        updateGameCreateTagInput.value = '';
+        updateGameCreateTagInputWarningLabel.textContent = '';
+        updateGameCreateTagInput.dispatchEvent(new Event('input'));
+
+        updateUpdateGameClearButton();
+    }
+}
+
+function updateTagsTabTagsList() {
+    const tagList = document.getElementById('tagList');
+
+    // Clear existing contents
+    tagList.innerHTML = '';
+
+    // Create an element for each tag
+    window.data.tags.forEach(tag => {
+        const tagElement = document.createElement('div');
+        tagElement.className = "card";
+        tagElement.style.display = "flex";
+        tagElement.style.alignItems = "center";
+        tagElement.style.background = "var(--bg)";
+        tagElement.style.overflowY = "auto";
+        tagElement.style.scrollbarGutter = "stable";
+
+        const tagTextGroup = document.createElement('div');
+        tagTextGroup.style.display = "flex";
+        tagTextGroup.style.flexDirection = "column";
+        
+        // Display Name
+        const tagName = document.createElement('div');
+        tagName.textContent = tag.name;
+        tagTextGroup.appendChild(tagName);
+
+        // Display "Used by X games"
+        const tagInUseCounter = document.createElement('div');
+        tagInUseCounter.textContent = `Used by ${tag.games.length} games`;
+        tagInUseCounter.style.fontSize = "12px";
+        tagInUseCounter.className = "text-muted";
+        tagTextGroup.appendChild(tagInUseCounter);
+        
+        tagElement.appendChild(tagTextGroup);
+        
+        // Action Buttons
+        const tagActionsGroup = document.createElement('div');
+        tagActionsGroup.style.display = "flex";
+        tagActionsGroup.style.alignItems = "center";
+        tagActionsGroup.style.gap = "8px";
+        tagActionsGroup.style.flexShrink = "0";
+        tagActionsGroup.style.marginLeft = "auto";
+
+        // Unassign Button
+        const tagUnassign = document.createElement('button');
+        tagUnassign.className = 'button-remove';
+        tagUnassign.textContent = "Unassign";
+        tagUnassign.type = "button";
+        tagUnassign.addEventListener('click', () => {
+            tagTabTagUnassignButtonClicked(tag.id);
+        });
+
+        tagActionsGroup.appendChild(tagUnassign);
+
+        // Delete Button
+        const tagDelete = document.createElement('button');
+        tagDelete.className = 'button-remove';
+        tagDelete.textContent = 'Delete';
+        tagDelete.type = "button";
+        tagDelete.addEventListener('click', () => {
+            tagTabTagDeleteButtonClicked(tag.id);
+        });
+
+        tagActionsGroup.appendChild(tagDelete);
+
+        tagElement.appendChild(tagActionsGroup);
+
+        tagList.appendChild(tagElement);
+    });
+
+    // Update tag count
+    document.getElementById('totalTagCount').textContent = `(${window.data.tags.length})`;
+}
+
+function enableTagTabAddTagButton() {
+    tagTabAddTagButton.setAttribute('aria-selected', 'true');
+    tagTabAddTagButton.className = "button-active";
+}
+
+function disableTagTabAddTagButton() {
+    tagTabAddTagButton.setAttribute('aria-selected', 'false');
+    tagTabAddTagButton.className = "button-disabled";
+}
+
+function updateTagTabAddTagElements() {
+    const newName = tagTabAddTagInput.value.trim();
+    const alreadyExists = window.data.tags.some(tag => tag.name === newName);
+
+    if(alreadyExists) {
+        tagTabAddTagInputWarningLabel.textContent = "A tag with that name already exists!";
+    }
+    else {
+        tagTabAddTagInputWarningLabel.textContent = "";
+    }
+
+    if (newName === '' || alreadyExists) {
+        if(tagTabAddTagButton.getAttribute('aria-selected') === 'true') {
+            disableTagTabAddTagButton();
+        }
+    }
+
+    else {
+        if(tagTabAddTagButton.getAttribute('aria-selected') === 'false') {
+            enableTagTabAddTagButton();
+        }
+    }
+
+}
+
+function updateTagTabGamesChecboxList() {
+    const tagTabGamesChecboxList = document.getElementById('tagTabGamesChecboxList');
+
+    // Clear existing checkboxes
+    tagTabGamesChecboxList.innerHTML = '';
+
+    // Create a checkbox for every existing tag
+    if(window.data.games) {
+        window.data.games.forEach(game => {
+            const gameCheckboxListItem = document.createElement('div');
+            gameCheckboxListItem.classList.add('checkbox-item');
+
+            const gameCheckboxListItemCheckbox = document.createElement('input');
+            gameCheckboxListItemCheckbox.type = 'checkbox';
+            gameCheckboxListItemCheckbox.value = game.id;
+            gameCheckboxListItemCheckbox.name = 'tagGames';
+            gameCheckboxListItemCheckbox.id = `game-${game.id}`;
+            gameCheckboxListItemCheckbox.style.flex = "1";
+
+            const gameCheckboxListItemLabel = document.createElement('label');
+            gameCheckboxListItemLabel.textContent = game.name;
+            gameCheckboxListItemLabel.htmlFor = `game-${game.id}`;
+
+            gameCheckboxListItem.appendChild(gameCheckboxListItemCheckbox);
+            gameCheckboxListItem.appendChild(gameCheckboxListItemLabel);
+
+            tagTabGamesChecboxList.appendChild(gameCheckboxListItem);
+        });
+    }
+}
+
+function tagTabTagUnassignButtonClicked(tagId){
+    const tagName = tags.find(tag => tag.id === tagId).name;
+    window.data.updateTag(tagId, tagName);
+
+    updateTagTabAddTagElements();
+    updateTagTabGamesChecboxList();
+    updateTagsTabTagsList();
+}
+
+function tagTabTagDeleteButtonClicked(tagId){
+    window.data.deleteTag(tagId);
+
+    updateTotalTagsLabel();
+    updateTagTabAddTagElements();
+    updateTagTabGamesChecboxList();
+    updateTagsTabTagsList();
+    updateAddGamesTabTagCheckboxes();
+    updateUpdateGameView();
+}
