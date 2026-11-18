@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>main.html</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+
+<body>
+    <main>
+        <section id="homePage">
+            <header>
+                <div class="header">Home Page</div>
+                <h1>Archipelago Tools</h1>
+                <div class="border-bottom"></div>
+            </header>
+
+    
+            <h2>Games and Tags:</h2>
+
+            <section class="tools" aria-label="Available tools">
+                <article class="tool-card">
+                    <div class="tool-heading">
+                        <div class="tool-icon" aria-hidden="true">🎮</div>
+                        <h2 class="tool-title">Games List</h2>
+                    </div>
+                    <p>Manage your game library, organize games with tags, and track how many times you've played each game.</p>
+                    <a class="button" href="#gamesandtags">Open Games List →</a>
+                </article>
+
+                <article class="tool-card">
+                    <div class="tool-heading">
+                        <div class="tool-icon" aria-hidden="true">⚙️</div>
+                        <h2 class="tool-title">Rule Settings</h2>
+                    </div>
+                    <p>Manage rules for tags and games to customize how games are selected when using the game picker.</p>
+                    <a class="button" href="#rulesettings">Open Rule Settings →</a>
+                </article>
+    
+                <article class="tool-card">
+                    <div class="tool-heading">
+                        <div class="tool-icon" aria-hidden="true">🛠</div>
+                        <h2 class="tool-title">Data Management</h2>
+                    </div>
+                    <p>Manage your data for this app.</p>
+                    <a class="button" href="#datamanagement">Open Dev Tools →</a>
+                    </div>
+                </article>
+
+                <article class="tool-card">
+                    <div class="tool-heading">
+                        <div class="tool-icon" aria-hidden="true">🎲</div>
+                        <h2 class="tool-title">Random Game Picker</h2>
+                    </div>
+                    <p>Generate a random selection of games from your library, following your custom game and tag rules.</p>
+                    <a class="button" href="#gamepicker">Open Random Game Picker →</a>
+                </article>
+                
+            </section>
+        </section>
+    <section id="gamesandtagsPage" hidden>
+    <header>
+        <a href="#" class="back-home">
+            <span aria-hidden="true">←</span> Back to Home
+        </a>
+  
+        <h1>🎮 Archipelago Games List</h1>
+        <div class="text-muted">Manage your games and tags!</div>
+        <div class="border-bottom"></div>
+    </header>
+
+    <div>
+        <section style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px;">
+            <div class="card">
+                <div class="text" id="totalGamesLabel">0</div>
+                <div class="text-muted">Total games</div>
+            </div>
+
+            <div class="card">
+                <div class="text" id="totalTagsLabel">0</div>
+                <div class="text-muted">Tags in use</div>
+            </div>
+        </section>
+
+        <nav class="tabs">
+            <button type="button" class="active" id="gamesTabButton" aria-selected="true">Games List</button>
+            <button type="button" id="tagsTabButton" aria-selected="false">Tag Editor</button>
+        </nav>
+
+        <section id="gamesTabView">
+            <section class="card">
+                <div class="toolbar">
+                    <button id="addGameButton" aria-selected="false">＋ Add Game</button>
+                    <button id="updateGameButton" aria-selected="false">Update Game</button>
+
+                </div>
+            </section>
+
+            <section class="card" 
+                id="addGameView" 
+                style="margin-top: 12px; display:none;">
+
+                <h2 id="formTitle">Add a game!</h2>
+                <form id="form">
+
+                    <div class="toolbar">
+                        <label>Game name:
+                            <div>
+                                <input id="addGameNameInput" maxlength="50" placeholder="e.g. Super Metroid">
+                                <label id="addGameNameInputWarningLabel" style="color:#ff929a;"></label>
+                            </div>
+                        </label>
+
+	                    <label>Times played:
+                            <input id="addGameTimesPlayedInput" type="number" min="0" step="1" inputmode="numeric" value="0">
+                        </label>
+                    </div>
+
+                    <div class="card" style="background:var(--bg)">
+                        <label>Tags:</label>
+	                    <div id="addGameTagCheckboxList"></div>
+                    </div>
+
+                    <div style="margin-top:12px">
+                        <label>Create a new tag:</label>
+                        <div class="toolbar create-tag-toolbar">
+                            <div>
+                                <input id="addGameCreateTagInput" maxlength="50" placeholder="e.g. Big, Dolphin, CPU intensive">
+                                <label id="addGameCreateTagInputWarningLabel" style="color:#ff929a;"></label>
+                            </div>
+                            <div>
+                                <button id="addGameCreateTagButton" type="button" class="button-disabled" aria-selected="false">
+                                    ＋ Create Tag
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+      
+                    <div class="toolbar">
+                        <button class="button-disabled" type="button" id="addGameSaveGameButton" aria-selected="false">Save Game</button>
+                        <button class="button-disabled" type="button" id="addGameClearButton" aria-selected="false">Clear</button>
+                    </div>
+      
+                </form>
+            </section>
+
+            <section class="card" 
+                id="updateGameView" 
+                style="margin-top: 12px; display:none;">
+
+                <p id="updateGameViewNoGameSelectedLabel">Placeholder text</p>
+
+                <div id="updateGameViewForm">
+                    <h2 id="updateGameViewFormHeaderLabel">Update a game!</h2>
+                    <form id="form">
+
+                        <div class="toolbar">
+                            <label>Game name:
+                                <div>
+                                    <input id="updateGameNameInput" maxlength="50" placeholder="e.g. Super Metroid">
+                                    <label id="updateGameNameInputWarningLabel" style="color:#ff929a;"></label>
+                                </div>
+                            </label>
+
+                            <label>Times played:
+                                <input id="updateGameTimesPlayedInput" type="number" min="0" step="1" inputmode="numeric" value="0">
+                            </label>
+                        </div>
+
+                        <div class="card" style="background:var(--bg)">
+                            <label>Tags:</label>
+                            <div id="updateGameTagCheckboxList"></div>
+                        </div>
+
+                        <div style="margin-top:12px">
+                            <label>Create a new tag:</label>
+                            <div class="toolbar create-tag-toolbar">
+                                <div>
+                                    <input id="updateGameCreateTagInput" maxlength="50" placeholder="e.g. Big, Dolphin, CPU intensive">
+                                    <label id="updateGameCreateTagInputWarningLabel" style="color:#ff929a;"></label>
+                                </div>
+                                <div>
+                                    <button id="updateGameCreateTagButton" type="button" class="button-disabled" aria-selected="false">
+                                        ＋ Create Tag
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+        
+                        <div class="toolbar">
+                            <button class="button-disabled" type="button" id="updateGameUpdateGameButton" aria-selected="false">Update Game</button>
+                            <button class="button-disabled" type="button" id="updateGameClearButton" aria-selected="false">Clear</button>
+                        </div>
+        
+                    </form>
+                </div>
+
+            </section>
+
+            <div class="card">
+                <div class="toolbar">
+                    <h2 id="yourGamesLabel">Your games (X):</h2>
+                    <input id="gamesTabSearchInput" placeholder="Search games or tags...">
+                    <select id="gamesTabSearchFilter">
+                        <option value="games">Search Games</option>
+                        <option value="tags">Seach Tags</option>
+                    </select>
+                </div>
+                <div id="gamesTabGamesList"></div>
+            </div>
+        </section>
+
+        <section id="tagsTabView" hidden>
+            <section class="card">
+                <h2>Manage tags</h2>
+                
+                <p class="text-muted">Add tags and optionally assign them to existing games.</p>
+
+                <div class="toolbar">
+                    <div>
+                        <input id="tagTabAddTagInput" maxlength="50" placeholder="New tag name" aria-label="New tag name">
+                        <label id="tagTabAddTagInputWarningLabel" style="color:#ff929a;"></label>
+                    </div>
+                    <button type="button" class="button-disabled" id="tagTabAddTagButton" aria-selected="false">＋ Add Tag</button>
+                </div>
+      
+                <div>
+                    <strong>Assign to existing games 
+                        <span class="text-muted" style="font-weight:normal">(optional)</span>
+                    </strong>
+                        
+                    <p class="text-muted" style="margin:4px 0">Choose any games that should receive this tag when you add it.</p>
+                    <div id="tagTabGamesChecboxList" class="card" style="background:var(--bg)"></div>
+                </div>
+            </section>
+    
+            <section class="card">
+                <h2>All tags 
+                    <span id="totalTagCount"></span>
+                </h2>
+        
+                <p class="text-muted" style="margin: 0px;"><strong>Unassign</strong> removes a tag from every game but keeps the tag available.</p>
+                <p class="text-muted" style="margin: 0px;"><strong>Delete</strong> unassigns a tag from all games and deletes the tag.</p>
+
+                <div id="tagList"></div>
+            </section>
+        </section>
+
+        <p class="text-muted" style="font-size:12px;text-align:center">Changes are saved locally in this browser cache. Export backups regularly.</p>
+    </div>
+</section>
+<section id="rulesettingsPage" hidden>
+    <header>
+        <a href="#" class="back-home">
+            <span aria-hidden="true">←</span> Back to Home
+        </a>
+  
+        <h1>⚙️ Rule Settings</h1>
+        <div class="text-muted">Manage rules for your games and tags to customize how games are selected when using the game picker</div>
+        <div class="border-bottom"></div>
+    </header>
+
+    <div>
+        <section class="card">
+            <h2 style="text-align: left; margin-left: 0; padding-left: 0;">Add a New Rule</h2>
+            <p class="section-description">Choose what the rule applies to, select a game or tag, and pick a rule preset.</p>
+
+            <form id="ruleForm">
+                <div class="toolbar">
+                    <div>
+                        <label for="ruleAppliesToSelect">Rule applies to</label>
+                        <select id="ruleAppliesToSelect">
+                            <option value="games">Games</option>
+                            <option value="tags">Tags</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label for="chooseAGameOrTagSelect">Choose a game or tag</label>
+                        <select id="chooseAGameOrTagSelect"></select>
+                    </div>
+                </div>
+
+                <div class="toolbar">
+                    <div>
+                        <label for="rulePresetSelect">Rule preset</label>
+                        <select id="rulePresetSelect" required></select>
+                    </div>
+
+                    <div id="ruleDefinition">
+                        <label for="ruleDefinitionPlaceholder">Rule definition</label>
+                        <div id="ruleDefinitionPlaceholder"></div>
+                    </div>
+                </div>
+                    
+                <div>
+                    <label id="addRuleButtonWarningLabel" style="display: block; color: var(--warning);"></label>
+                    <button id="addRuleButton" type="button">Add Rule</button>
+                </div>
+
+            </form>
+        </section>
+
+        <section class="card">
+            <div class="toolbar">
+                <h2 id="currentRulesLabel" style="margin-bottom: 4px;">Current Rules (X):</h2>
+                
+                <input id="rulesSearchInput" placeholder="Search rules...">
+                    <select id="rulesSearchSelect">
+                        <option value="games">Search Games</option>
+                        <option value="tags">Seach Tags</option>
+                    </select>
+                </input>
+            </div>
+            <p style="margin-top: 0;">You will be able to select from these rules when using the game picker</p>
+            <div id="currentRulesList"></div>
+        </section>
+
+        <p class="text-muted" style="font-size:12px;text-align:center">Changes are saved locally in this browser cache. Export backups regularly.</p>
+    </div>
+
+</section>
+<section id="datamanagementPage" hidden>
+    <header>
+        <a href="#" class="back-home">
+            <span aria-hidden="true">←</span> Back to Home
+        </a>
+  
+        <h1>🛠 Data Management</h1>
+        <div class="text-muted">Manage your games and tags!</div>
+        <div class="border-bottom"></div>
+    </header>
+
+    <div>
+        <section class="tools">
+            <article class="tool-card">
+                <div class="tool-heading">
+                    <h2 class="tool-title">Export Data</h2>
+                </div>
+                <p>Export your data to a file</p>
+                <button id="exportDataButton" type="button" class="button-active" aria-selected="true">Export Data</button>
+            </article>
+
+            <article class="tool-card">
+                <div class="tool-heading">
+                    <h2 class="tool-title">Import Data</h2>
+                </div>
+                <p>Import your data from a file</p>
+                <button id="importDataButton" type="button" class="button-active" aria-selected="true">Import Data</button>
+            </article>
+
+            <article class="tool-card">
+                <div class="tool-heading">
+                    <h2 class="tool-title">Clear Cache</h2>
+                </div>
+                <p>Clear you browser cache</p>
+                <p>WARNING! THIS WILL ERASE ALL YOUR DATA</p>
+                <button id="clearCacheButton" class="button-remove" type="button">Clear All Data</button>
+            </article>
+
+        </section>
+    </div>
+
+</section>
+<section id="gamepickerPage" hidden>
+    <header>
+        <a href="#" class="back-home">
+            <span aria-hidden="true">←</span> Back to Home
+        </a>
+  
+        <h1>🎲 Random Game Picker</h1>
+        <div class="text-muted">Pick games for your Archipelago Session!</div>
+        <div class="border-bottom"></div>
+    </header>
+
+    <div>
+        <section class="card">
+        <h2 style="text-align: left; margin-left: 0; padding-left: 0;">Generation Options</h2>
+            <div>
+                <div>
+                    <span class="field-label">Number of Games:</span>
+
+                    <div class="radio-option">
+                        <input id="generationOptionsExactlyRadioButton" type="radio" name="countMode" value="exactly" checked></input>
+                        <label for="generationOptionsExactlyRadioButton">Exactly</label>
+                    </div>
+
+                    <div class="radio-option">
+                        <input id="generationOptionsBetweenRadioButton" type="radio" name="countMode" value="between"></input>
+                        <label for="generationOptionsBetweenRadioButton">Between</label>
+                    </div>
+
+                    <div id="generationOptionsExactlyDiv" class="toolbar">
+                        <div>
+                            <label>Count:</label>
+                            <input type="number" id="generationOptionsExactlyInput" min="1" step="1" value="3"></input>
+                        </div>
+                    </div>
+
+                    <div id="generationOptionsBetweenDiv" class="toolbar hidden">
+                        <div>
+                            <label class="field-label" id="generationOptionsMinCountLabel" for="generationOptionsMinCountInput">Minimum:</label>
+                            <input type="number" id="generationOptionsMinInput" min="1" step="1" value="2"></input>
+                        </div>
+
+                        <div>
+                            <label class="field-label" for="generationOptionsMaxCountInput">Maximum:</label>
+                            <input type="number" id="generationOptionsMaxInput" min="1" step="1" value="5"></input>
+                        </div>
+                    </div>
+                </div>
+            
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <input class="checkbox-item" type="checkbox" id="generationOptionsWithReplacementCheckbox"></input>
+                    <label>With Replacement</label>
+                    <span class="tooltip" tabindex="0" role="img"
+                        aria-label="If checked, the same game can be picked multiple times"
+                        title="If checked, the same game can be picked multiple times"
+                        style=" display: inline-flex; align-items: center; justify-content: center;
+                            width: 18px; height: 18px; border: 1px solid var(--text);
+                            border-radius: 50%; font-size: 12px; font-weight: bold;
+                            cursor: help; flex-shrink: 0;">?
+                    </span>
+                </div>
+            </div>
+        </section>
+
+        <section class="card">
+            <div class="toolbar">
+                <button id="gameSelectionTabButton" class="button-active" type="button" aria-selected="true">Games</button>
+                <button id="ruleSelectionTabButton"  type="button" aria-selected="false">Rules</button>
+            </div>
+
+            <div id="gameSelectionView">
+                <div class="section-heading">
+                    <h2 style="text-align: left; margin-left: 0; padding-left: 0;">Game Selection</h2>
+                </div>
+
+                <p class="text-muted">
+                    Click a Game to move it between Active and Inactive.
+                    Only active games will be used when picking.
+                </p>
+
+                <div class="two-column-grid">
+                    <section class="column-grid">
+                        <h3 style="display: block; color: var(--warning);">X Inactive Games</h3>
+                        <p class="column-description">These games are forbidden during picking.</p>
+                        <div class="border-bottom" style="margin-bottom: 10px;"></div>
+                        <div id="gameSelectionInactiveGames" class="column-list"></div>
+                    </section>
+
+                    <section class="column-grid">
+                        <h3 style="display: block; color: var(--accent);">✓ Active Games</h3>
+                        <p class="column-description">These games will allowed during picking.</p>
+                        <div class="border-bottom" style="margin-bottom: 10px;"></div>
+                        <div id="gameSelectionActiveGames" class="column-list"></div>
+                    </section>
+
+                </div>
+            </div>
+
+            <div id="ruleSelectionView" hidden>
+                <div class="section-heading">
+                    <h2 style="text-align: left; margin-left: 0; padding-left: 0;">Rule Selection</h2>
+                </div>
+
+                <p class="text-muted">
+                    Click a rule to move it between Active and Inactive.
+                    Only active rules will be used when picking.
+                </p>
+
+                <div class="two-column-grid">
+                    <section class="column-grid">
+                        <h3 style="display: block; color: var(--warning);">X Inactive Rules</h3>
+                        <p class="column-description">These rules will be ignored by the picker.</p>
+                        <div class="border-bottom" style="margin-bottom: 10px;"></div>
+                        <div id="ruleSelectionInactiveRules" class="column-list"></div>
+                    </section>
+
+                    <section class="column-grid">
+                        <h3 style="display: block; color: var(--accent);">✓ Active Rules</h3>
+                        <p class="column-description">These rules will be applied during picking.</p>
+                        <div class="border-bottom" style="margin-bottom: 10px;"></div>
+                        <div id="ruleSelectionActiveRules" class="column-list"></div>
+                    </section>
+
+                </div>
+            </div>
+
+        </section>
+
+        <section class="card">
+            <h2 style="text-align: left; margin-left: 0; padding-left: 0;">Selection Summary</h2>
+
+            <div class="card" style="background: var(--bg);">
+                <label id="activeGamesLabel" style="display: block;"></label>
+                <label id="activeRulesLabel" style="display: block;"></label>
+                <label id="minimumGamesToSatifyAllRulesLabel" style="display: block;"></label>
+            </div>
+
+            <div id="selectionSummaryView" class="card-warning" aria-live="polite">
+                <h3>⚠️ Warnings</h3>
+                <div>
+                    <p id="selectionSummaryWarningsLabel" style="color: var(--warning)"></p>
+                </div>
+            </div>
+        </section>
+
+        <section class="card">
+            <h2>Generate Games</h2>
+            <p class="muted">Your generation options and active rules are ready to use.</p>
+
+            
+            <div class="toolbar">
+                <button type="button" class="button-disabled" id="generateGamesButton" aria-selected="false">Generate Games</button>
+                <button type="button" class="button-remove" id="clearGamesButton" aria-selected="false">Clear Games</button>
+            </div>
+
+            <div class="card" id="pickedGamesView" hidden>
+                <h2 style="text-align: left; margin-left: 0; padding-left: 0;">Your Picked Games!</h2>
+
+                <div id="pickedGamesList"></div>
+            </div>
+        </section>
+
+        <p class="text-muted" style="font-size:12px;text-align:center">Changes are saved locally in this browser cache. Export backups regularly.</p>
+    </div>
+
+</section>
+</main>
+
+    <script src="js/data.js"></script>
+    <script src="js/dataDefs.js"></script>
+    <script src="js/gamesandtags.js"></script>
+    <script src="js/rulesettings.js"></script>
+    <script src="js/datamanagement.js"></script>
+    <script src="js/gamepicker.js"></script>
+    <script src="js/navigation.js"></script>
+    
+</body>
+
+</html>
